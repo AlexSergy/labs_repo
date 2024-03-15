@@ -1,0 +1,8 @@
+﻿  main_code.cpp
+C:\Users\User\source\repos\Laba_nomer_1\main_code.cpp(109,3): warning C4551: в вызове функции отсутствует список аргументов
+  Создание кода
+  15 of 170 functions ( 8.8%) were compiled, the rest were copied from previous compilation.
+    10 functions were new in current compilation
+    14 functions had inline decision re-evaluated but remain unchanged
+  Создание кода завершено
+  Laba_nomer_1.vcxproj -> C:\Users\User\source\repos\Laba_nomer_1\x64\Release\Laba_nomer_1.exe
