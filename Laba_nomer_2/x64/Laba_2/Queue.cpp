@@ -87,23 +87,25 @@ public:
 			if (current->data < 0) {
 				if (current == first) {
 					first = current->next;
+					if (first == nullptr) { // переместил последнее условие сюда
+						last = nullptr;
+					}
 				}
 				else {
 					prev->next = current->next;
+					if (current == last) {
+						last = prev;
+					}
 				}
-				current->next = nullptr; // ќбнул€ем next перед удалением
+				/*“еперь при удалении считаем на с начала списка, а со следующего элемента*/
 				Node* temp = current;
-				current = first;
+				current = current->next; 
 				delete temp;
 			}
 			else {
 				prev = current;
 				current = current->next;
 			}
-		}
-
-		if (first == nullptr) {
-			last = nullptr;
 		}
 	}
 
