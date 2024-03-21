@@ -2,6 +2,7 @@
   main_code.cpp
   Создание кода
   Previous IPDB not found, fall back to full compilation.
+C:\Users\User\source\repos\Laba_nomer_3\List.cpp(95): warning C4715: List::elementAt: значение возвращается не при всех путях выполнения
   All 24 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Создание кода завершено
   Laba_nomer_3.vcxproj -> C:\Users\User\source\repos\Laba_nomer_3\x64\Release\Laba_nomer_3.exe

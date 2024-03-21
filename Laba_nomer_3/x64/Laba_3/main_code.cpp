@@ -26,7 +26,6 @@ int main() {
             while (true) {
                 cout << "Значение - ";
                 if (!(cin >> value)) {
-                    cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     cout << "Выход в меню.\n";
                     break;

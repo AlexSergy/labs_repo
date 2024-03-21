@@ -10,7 +10,7 @@ struct Node { // создаем структуру узла
 
 class List {
 public:
-	Node* head; // первый, головной элемент
+	Node* head = nullptr; // первый, головной элемент
 	int common_count = 0;
 
 	void add(int value) {
@@ -31,31 +31,75 @@ public:
 		}
 	}
 
-	void insert(int num, int value) {
-		int current = 0;
-		Node* currentNode = head;
-		while (current != num) {
-			currentNode = currentNode->next;
-			current++;
+	void insert(int num, int value) { // ??
+		if (num < 0 || num > common_count || (head == nullptr && num > 0)) {
+			return;
 		}
-		currentNode->data = value;
+		Node* newNode = new Node(value);
+		Node* currentNode = head;
+
+		if (num == common_count && common_count != 0) { // Случай, когда мы добавляем элемент в конец списка
+			for (int i = 0; i < num-1; i++) { currentNode = currentNode->next; }
+			currentNode->next = newNode;
+			newNode->next = head;
+		}
+
+		else if (num == 0) { // Если присваиваем на первое место
+			if (head == nullptr) { 
+				head = newNode;
+			}
+			else {
+				while (currentNode->next != head) { currentNode = currentNode->next; }
+				currentNode->next = newNode;
+				newNode->next = head;
+				head = newNode;
+			}
+		}
+		else {
+			for (int i = 0; i < num-1; i++) { currentNode = currentNode->next; }
+			newNode->next = currentNode->next;
+			currentNode->next = newNode;
+		}
+
+		common_count++;
 	}
 
 	void removeAt(int num) {
-		if (num < 0 || num >= common_count || (head == nullptr && num > 0)) {
-			return; // просто выходим из метода из-за ошибки
-		}
-		int current = 0;
-		Node* currentNode = head;
+		if (num < 0 || num >= common_count || (head == nullptr && num > 0)) { return; }
+		int cur = 0;
+		Node* beforeDel = head;
+		
+		if (head == nullptr) { return; }
 
-		while (((current != num - 1) - (num == 0)) != 0) {
-			currentNode = currentNode->next;
-			current++;
+		if (num == 0) {
+			if (common_count == 1) {
+				head->next = nullptr;
+				delete head;
+				head = beforeDel = nullptr;
+				common_count--;
+				return;
+			}
+			else {
+				while (beforeDel->next != head) { beforeDel = beforeDel->next; }
+				head = head->next;
+				beforeDel->next->next = nullptr;
+				delete beforeDel->next;
+				beforeDel->next = head;
+				common_count--;
+				return;
+			}
 		}
-		Node* delNode = currentNode->next;
-		currentNode->next = currentNode->next->next;
-		delNode->next = nullptr;
-		delete delNode;
+
+		
+		while (cur != num - 1) {
+			beforeDel = beforeDel->next;
+			cur++;
+		}
+
+		Node* crutch = beforeDel->next->next;
+		beforeDel->next->next = nullptr;
+		delete beforeDel->next;
+		beforeDel->next = crutch;
 		common_count--;
 	}
 
@@ -66,12 +110,13 @@ public:
 			currentNode = currentNode->next;
 			current++;
 		}
-		return currentNode->data;
+		if (currentNode != nullptr) { return currentNode->data; }
+		else { return -1; }
 	}
 
 	int count() { return common_count; }
 
-	void insertBeforeNegative() {
+	void insertBeforeNegative() { 
 		Node* currentNode = head;
 		do {
 			if (currentNode->next->data < 0) {
@@ -85,7 +130,7 @@ public:
 		} while (currentNode->next != head->next);
 	}
 
-	void removeNegative() {
+	void removeNegative() { 
 		Node* currentNode = head;
 		do {
 			if (currentNode->next->data < 0) {
@@ -116,15 +161,14 @@ public:
 			return; // Список уже пуст, ничего не нужно делать
 		}
 
-		Node* current = head->next;
-		head->next = nullptr;
+		Node* current = head;
+		do {
+			Node* nextNode = current->next;
+			delete current;
+			current = nextNode;
+		} while (current != head);
+
 		head = nullptr;
 		common_count = 0;
-
-		while (current != nullptr) {
-			Node* temp = current->next;
-			delete current;
-			current = temp;
-		}
 	}
 };
