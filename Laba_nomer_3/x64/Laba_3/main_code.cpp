@@ -26,6 +26,7 @@ int main() {
             while (true) {
                 cout << "Значение - ";
                 if (!(cin >> value)) {
+                    cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     cout << "Выход в меню.\n";
                     break;
@@ -37,6 +38,7 @@ int main() {
             cout << "Введите позицию для вставки элемента: ";
             int position;
             cin >> position;
+            if (position < 0) { cout << "Неправильный индекс, попробуйте снова!\n" << endl; }
             cout << "Введите значение элемента: ";
             cin >> value;
             L.insert(position, value);
