@@ -76,19 +76,24 @@ public:
 		beforeDel->next = del->next;
 		if (head == del && common_count > 1) { head = head->next; } // условия если выбрано начало
 		if (common_count == 1) { head = nullptr; }
-		if (num < num_flag) { num_flag--; }
-		if (num == num_flag) { num_flag = -1; }
+		if (num < num_flag) { num_flag--; } // условия для num_flag
+		if (num == num_flag) { 
+			num_flag = -1;
+			flag = nullptr;
+		}
 		del->next = nullptr;
 		delete del;
+		del = nullptr;
 		common_count--;
 	}
 
 	int elementAt(int num) {
-		if (num < 0 || head == nullptr) { throw out_of_range("Invalid value!"); }
-		Node* cur = nullptr;
+		if (num < 0 || head == nullptr) { throw out_of_range("Invalid value or empty list!"); }
+		Node* cur = head;
+		num %= common_count;
 		if (flag == nullptr || num < num_flag) { cur = go_to_num(head, num + 1); }
 		else if (num == num_flag) { cur = flag; }
-		else { cur = go_to_num(flag, (num+1) - num_flag); }
+		else if (flag != nullptr) { cur = go_to_num(flag, (num+1) - num_flag); }
 		flag = cur;
 		num_flag = num;
 		return cur->data;
