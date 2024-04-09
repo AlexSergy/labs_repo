@@ -47,23 +47,26 @@ public:
     }
 
     void insert(int num, const T& data) {
-        if (num < 0 || num >= common_count) { return; }
+        if (num < 0 || num > common_count) { throw out_of_range("Out of range!"); }
+        Node* newNode = new Node(data);
         if (num == 0) {
-            Node* newNode = new Node(data);
             newNode->next = head;
             if (head != nullptr) { head->prev = newNode; }
             else { tail = newNode; }
             head = newNode;
         }
+        else if (num == common_count) {
+            tail->next = newNode;
+            newNode->prev = tail;
+            tail = newNode;
+        }
         else {
-            Node* newNode = new Node(data);
             Node* current = head;
-            for (int i = 0; i < num - 1; i++) current = current->next;
+            for (int i = 0; i < num - 1; i++) { current = current->next; }
             newNode->next = current->next;
-            newNode->prev = current;
-            if (current->next) current->next->prev = newNode;
-            else tail = newNode;
+            current->next->prev = newNode;
             current->next = newNode;
+            newNode->prev = current;
         }
         common_count++;
     }
@@ -148,6 +151,7 @@ public:
                 else { cur->next->prev = prev; }
                 cur = cur->next;
                 delete del;
+                common_count--;
             }
             else {
                 prev = cur;

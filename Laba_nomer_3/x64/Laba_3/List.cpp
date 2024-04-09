@@ -33,6 +33,13 @@ public:
 		return cur;
 	}
 
+	void flag_check(int num, int& num_flag, Node*& flag) {
+		if (num < num_flag) { num_flag--; } // условия для num_flag
+		if (num == num_flag) {
+			num_flag = -1;
+			flag = nullptr;
+		}
+	}
 
 	void add(int value) {
 		Node* newNode = new Node(value);
@@ -76,11 +83,7 @@ public:
 		beforeDel->next = del->next;
 		if (head == del && common_count > 1) { head = head->next; } // условия если выбрано начало
 		if (common_count == 1) { head = nullptr; }
-		if (num < num_flag) { num_flag--; } // условия для num_flag
-		if (num == num_flag) { 
-			num_flag = -1;
-			flag = nullptr;
-		}
+		flag_check(num, num_flag, flag);
 		del->next = nullptr;
 		delete del;
 		del = nullptr;
@@ -133,7 +136,7 @@ public:
 				delete cur;
 				cur = prev->next;
 				common_count--;
-				if (i <= num_flag) { num_flag--; }
+				flag_check(i, num_flag, flag);
 			}
 			else {
 				prev = cur;
