@@ -38,7 +38,10 @@ int main() {
             cout << "Введите позицию для вставки элемента: ";
             int position;
             cin >> position;
-            if (position < 0) { cout << "Неправильный индекс, попробуйте снова!\n" << endl; }
+            if (position < 0) {
+                cout << "Неправильный индекс, попробуйте снова!\n" << endl; 
+                break;
+            }
             cout << "Введите значение элемента: ";
             cin >> value;
             L.insert(position, value);

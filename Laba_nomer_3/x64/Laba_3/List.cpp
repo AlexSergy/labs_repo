@@ -127,14 +127,16 @@ public:
 	void removeNegative() {
 		if (head == nullptr) { return; }
 		Node* prev = go_to_num(head);
-		Node* cur = prev->next;
+		Node* cur = head;
 		
 		for (int i = 0; i < common_count;) {
 			if (cur->data < 0) {
 				if (cur == head) { head = head->next; }
+				Node* del = cur;
 				prev->next = cur->next;
-				delete cur;
-				cur = prev->next;
+				cur = cur->next;
+				del->next = nullptr;
+				delete del;
 				common_count--;
 				flag_check(i, num_flag, flag);
 			}
