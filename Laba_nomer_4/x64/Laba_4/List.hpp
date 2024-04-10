@@ -1,5 +1,5 @@
-#ifndef LIST_HPP
-#define LIST_HPP
+#pragma once
+
 
 #include<string>
 #include<stdexcept>
@@ -97,23 +97,28 @@ public:
 
 
         Node* start = head;
+        int steps = num;
         int distance_head = num;
         int distance_tail = common_count - num - 1;
         int distance_prev = prevNode ? abs(prevNum - num) : INT_MAX; // индекса нет => инт макс
         // если нет prevNode, то любой другой путь быстрее, чем distance_prev
 
-        // ищем ближайшую точку
-        if (distance_prev < distance_head && distance_prev < distance_tail) {
-            start = prevNode;
-            num = distance_prev;
-            if (prevNum > num) { for (int i = prevNum; i > num; i--) { start = start->prev; } }
-            else { for (int i = prevNum; i < num; i++) { start = start->next; } }
+        // ищем ближайшую точку и кол-во шагов до точки
+        if (distance_head <= distance_tail && distance_head <= distance_prev) {
+            start = head;
+            steps = num;
         }
-        else if (distance_tail < distance_head) {
+        else if (distance_tail < distance_head && distance_tail < distance_prev) {
             start = tail;
-            for (int i = common_count - 1; i > num; i--) { start = start->prev; } 
+            steps = distance_tail;
         }
-        else { for (int i = 0; i < num; i++) { start = start->next; } }
+        else {
+            start = prevNode;
+            steps = prevNum < num ? num - prevNum : prevNum - num;
+        }
+        
+        if (prevNum > num) { while (steps-- > 0) { start = start->next; } }
+        else { while (steps-- > 0) { start = start->next; } }
 
         // обновляем прошлые значения
         prevNode = start;
@@ -163,4 +168,3 @@ public:
 
 
 
-#endif // LIST_HPP
