@@ -8,8 +8,6 @@ struct Node { // создаем структуру узла
 	Node(int value) : data(value), next(nullptr) {} // Если инициализируется нода с значением, значение присваиваем в data
 };
 
-
-
 class List {
 public:
 	Node* head = nullptr;
@@ -17,22 +15,21 @@ public:
 	int common_count = 0;
 	int num_flag = -1;
 
-	Node* go_to_num(Node* head) {
-		if (!head) { throw runtime_error("Empty list"); }
-		Node* cur = head;
-		while (cur != nullptr && cur->next != head) { cur = cur->next; }
-		return cur;
-	}
+	Node* go_to(int num) {
+		if (num < 0 || !head) { throw runtime_error("Invalid index or empty list."); }
+		num = (num % common_count);
+		Node* start = head;
+		int steps = num;
+		int distance_flag = flag ? num - num_flag : INT_MAX;
 
-	
-	Node* go_to_num(Node* head, int num) {
-		num--;
-		Node* cur = head;
-		if (common_count == 0) { num = 0; }
-		else if (common_count == num) { return go_to_num(head); } 
-		if (num == 0) { return cur; } 
-		for (int i = 0; i < num; i++) { cur = cur->next; }
-		return cur;
+		if (distance_flag >= 0 && distance_flag < steps) {
+			start = flag;
+			steps = distance_flag;
+		}
+		while (steps-- > 0) { start = start->next; }
+		flag = start;
+		num_flag = num;
+		return start;
 	}
 
 	void flag_check(int num, int& num_flag, Node*& flag) {
@@ -45,13 +42,13 @@ public:
 
 	void add(int value) {
 		Node* newNode = new Node(value);
-		common_count++;
 		if (head == nullptr) { head = newNode; newNode->next = head; }
 		else {
-			Node* last = go_to_num(head);
+			Node* last = go_to(common_count-1);
 			last->next = newNode;
 			newNode->next = head;
 		}
+		common_count++;
 	}
 
 	void insert(int num, int value) {
@@ -63,10 +60,10 @@ public:
 		Node* newNode = new Node(value);
 		Node* cur = nullptr;
 		if (num == 0) { 
-			cur = go_to_num(head);
+			cur = go_to(common_count-1);
 			head = newNode;
 		}
-		else { cur = go_to_num(head, num); }
+		else { cur = go_to(num-1); }
 		newNode->next = cur->next;
 		cur->next = newNode;
 		common_count++;
@@ -74,41 +71,28 @@ public:
 	}
 
 	void removeAt(int num) {
-		if (num < 0 || head == nullptr) { return; }
+		if (num < 0 || !head) { return; }
 		Node* beforeDel = nullptr;
 		Node* del = nullptr;
-		if (num == 0) { 
-			beforeDel = go_to_num(head);
+		if (num == 0) {
+			beforeDel = go_to(common_count - 1);
+			if (common_count > 1) { head = head->next; }
+			else { head = nullptr; }
 		}
-		else { beforeDel = go_to_num(head, num); }
+		else { beforeDel = go_to(num-1); }
 		del = beforeDel->next;
 		beforeDel->next = del->next;
-		if (head == del && common_count > 1) { head = head->next; } // условия если выбрано начало
-		if (common_count == 1) { head = nullptr; }
-		flag_check(num, num_flag, flag);
-		del->next = nullptr;
 		delete del;
-		del = nullptr;
 		common_count--;
 	}
 
-	int elementAt(int num) {
-		if (num < 0 || head == nullptr) { throw out_of_range("Invalid value or empty list!"); }
-		Node* cur = head;
-		num %= common_count;
-		if (flag == nullptr || num < num_flag) { cur = go_to_num(head, num + 1); }
-		else if (num == num_flag) { cur = flag; }
-		else if (flag != nullptr) { cur = go_to_num(flag, (num+1) - num_flag); }
-		flag = cur;
-		num_flag = num;
-		return cur->data;
-	}
-
+	int elementAt(int num) { return go_to(num)->data; }
+	
 	int count() { return common_count; }
 
 	void insertBeforeNegative() {
-		if (head == nullptr) { return; }
-		Node* prev = go_to_num(head);
+		if (!head) { return; }
+		Node* prev = go_to(common_count-1);
 		Node* cur = prev->next;
 		int count = common_count;
 
@@ -126,28 +110,35 @@ public:
 		}
 	}
 
-	void removeNegative() {
-		if (head == nullptr) { return; }
-		Node* prev = go_to_num(head);
-		Node* cur = head;
-		
-		for (int i = 0; i < common_count;) {
-			if (cur->data < 0) {
-				if (cur == head) { head = head->next; }
-				Node* del = cur;
-				prev->next = cur->next;
-				cur = cur->next;
-				del->next = nullptr;
-				delete del;
-				common_count--;
-				flag_check(i, num_flag, flag);
-			}
+	void RemNeg(Node*& prev, Node*& cur) {
+		if (cur->data < 0) {
+			prev->next = cur->next;
+			if (cur == head) { head = head->next; }
+			delete cur;
+			if (prev) { cur = prev->next; }
 			else {
-				prev = cur;
-				cur = cur->next;
-				i++;
+				head = nullptr;
+				flag = nullptr;
+				num_flag = -1;
+				return;
 			}
+			common_count--;
 		}
+		else {
+			prev = cur;
+			cur = cur->next;
+		}
+	}
+
+	void removeNegative() {
+		if (!head) { return; }
+		Node* prev = go_to(common_count-1);
+		Node* cur = prev->next;
+		int count = common_count;
+		/*Понятно, что если common_count будет уменьшаться, то
+		мы по сути будем идти по циклу лишние разы, но для 
+		простоты кода, решено сделать цикл от i до count.*/
+		for (int i = 0; i < count; i++) { RemNeg(prev, cur); }
 	} 
 
 	int count(int value) {

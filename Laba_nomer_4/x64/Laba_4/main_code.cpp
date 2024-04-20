@@ -1,23 +1,63 @@
 #include "List.hpp"
 #include "simple_map.hpp"
 #include <iostream>
-#include<string>
+#include <string>
 
 void print_menu() {
-    cout << "\n1. Добавить город\n";
-    cout << "2. Вывести регионы в порядке убывания населения\n";
-    cout << "3. Удалить города указанного региона\n";
-    cout << "4. Очистить список\n";
-    cout << "5. Закончить программу\n";
-    cout << "\nПримечание: строки вводите английскими символами!\n";
+    cout << "\nОПЕРАЦИИ С ГОРОДАМИ\n";
+    cout << "1. Добавить город\n";
+    cout << "2. Вставить город по номеру.\n";
+    cout << "3. Удалить город по номеру.\n";
+    cout << "4. Посмотреть, город в данной позиции.\n";
+    cout << "5. Вывести количество городов.\n";
+    cout << "\nОПЕРАЦИИ С РЕГИОНАМИ\n";
+    cout << "6. Вывести регионы в порядке убывания населения\n";
+    cout << "7. Удалить города указанного региона\n";
+    cout << "8. Очистить список городов (вместе с ним очищается список регионов).\n";
+    cout << "9. Закончить программу\n";
+    cout << "\nПримечание: строки вводите английскими символами! Индексация с нуля!\n";
 }
 
-int main1() {
+struct City {
+    string name;
+    string region;
+    int population;
+
+    City() {}
+    City(const string& region) : region(region) {}
+    bool operator==(const City& other) const { return region == other.region; }
+};
+
+void removeCitiesByRegion(List<City>& cities, simple_map<string, int>& regions, const string& region) {
+    regions.remove(region);
+    City searchReg(region); /* 
+    сложность здесь не совсем хорошая, так как два цикла, 
+    но все же, это простой метод с уже готовыми функциями */
+    while (cities.look_for(searchReg)) { cities.del_element(searchReg); }
+}
+
+void printSortedRegions(simple_map<string, int>& regions) {
+    Pair<string, int>* regionsArr = regions.hashset.toArray();
+    int count = regions.hashset.count();
+    regions.mergeSort(regionsArr, 0, count - 1);
+    for (int i = 0; i < count; i++) { cout << "Регион: " << regionsArr[i].key << ", Население: " << regionsArr[i].value << endl; }
+    delete[] regionsArr;
+}
+
+void fail() {
+    cin.clear(); 
+    cin.ignore(numeric_limits<streamsize>::max(), 'n'); 
+    cout << "Некорректный ввод. Попробуйте еще раз." << endl;
+}
+
+int main() {
     setlocale(LC_ALL, "ru");
     List<City> cities;
     simple_map<string, int> regions;
     int choice;
     City new_city;
+    int index = 0;
+
 
     print_menu();
 
@@ -37,36 +77,67 @@ int main1() {
             regions.insert(new_city.region, new_city.population);
             break;
         }
-        case 2: {
-            regions.sort();
-            simple_map<string, int>::Nodemap* cur = regions.head;
-            while (cur != nullptr) {
-                cout << "Регион: " << cur->key << ", население: " << cur->value << endl;
-                cur = cur->next; // переходим к следующему узлу
+        case 2:
+            cout << "Введите номер, под которым вставите город:";
+            cin >> index;
+            if (cin.fail() || index < 0 || index > cities.count()) { fail(); }
+            else {
+                cout << "\nВведите название города: ";
+                cin >> new_city.name;
+                cout << "Введите название региона: ";
+                cin >> new_city.region;
+                cout << "Введите количество жителей: ";
+                cin >> new_city.population;
+                cities.insert(index, new_city);
+                regions.insert(new_city.region, new_city.population);
+            }
+            break;
+        case 3:
+            cout << "Введите номер, под которым хотите удалить город: ";
+            cin >> index;
+            if (cin.fail() || index < 0 || index > cities.count()) { fail(); }
+            else {
+                const Node<City>& Node = cities.elementAt(index);
+                regions.remove_population(Node.data.region, Node.data.population);
+                cities.removeAt(index);
+            }
+            break;
+        case 4: {
+            cout << "Введите номер, под которым хотите посмотреть город: ";
+            cin >> index;
+            if (cin.fail() || index < 0 || index > cities.count()) { fail(); }
+            else {
+                City& city = cities.elementAt(index);
+                cout << "Название: " << city.name << ", Регион: " << city.region << ", Население: " << city.population << endl;
             }
             break;
         }
-        case 3: {
-            string region;
-            cout << "\nВведите название региона: ";
-            cin >> region;
-            cities.removeCitiesByRegion(region); 
-            regions.remove(region); 
+        case 5: {
+            cout << "Текущее количество городов: " << cities.count() << endl;
             break;
         }
-        case 4: {
-            cities.clear();
-            regions.clear();
+        case 6: {
+            printSortedRegions(regions);
             break;
         }
-        case 5: { return 0; }
-
-        default:{ 
+        case 7: {
+            string reg;
+            cout << "Напишите название региона: ";
+            cin >> reg;
+            removeCitiesByRegion(cities, regions, reg);
+            break;
+        }
+        case 8: {
+            cities.clear(); 
+            regions.hashset.clear();
+            cout << "Список городов и регионов очищен." << endl;
+            break;
+        }
+        case 9: { return 0; }
+        default: { 
             cout << "\nНекорректный ввод, попробуйте еще раз\n";
             break;
         }
         }
     }
-
-    return 0;
 }

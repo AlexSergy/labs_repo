@@ -3,100 +3,29 @@
 
 #include<string>
 #include<stdexcept>
+#include"Pair.hpp"
+#include"Node.hpp"
 
 using namespace std;
 
-struct City {
-    string name;
-    string region;
-    int population;
-};
+
 
 template <typename T>
 class List {
 public:
-
-    struct Node {
-        T data;
-        Node* prev;
-        Node* next;
-
-        Node(const T& value) : data(value), prev(nullptr), next(nullptr) {}
-    };
-
-    Node* head;
-    Node* tail;
+    Node<T>* head;
+    Node<T>* tail;
     int common_count;
-    Node* prevNode = nullptr;
+    Node<T>* prevNode = nullptr;
     int prevNum = -1;
 
     List() : head(nullptr), tail(nullptr), common_count(0) {}
 
-    void add(const T& data) {
-        Node* newNode = new Node(data);
-        if (head == nullptr) {
-            head = newNode;
-            tail = newNode;
-        }
-        else {
-            tail->next = newNode;
-            newNode->prev = tail;
-            tail = newNode;
-        }
-        common_count++;
-    }
+    // Блок кода с дополнительными функциями
+    // --------------------------------------------------------------------------------
 
-    void insert(int num, const T& data) {
-        if (num < 0 || num > common_count) { throw out_of_range("Out of range!"); }
-        Node* newNode = new Node(data);
-        if (num == 0) {
-            newNode->next = head;
-            if (head != nullptr) { head->prev = newNode; }
-            else { tail = newNode; }
-            head = newNode;
-        }
-        else if (num == common_count) {
-            tail->next = newNode;
-            newNode->prev = tail;
-            tail = newNode;
-        }
-        else {
-            Node* current = head;
-            for (int i = 0; i < num - 1; i++) { current = current->next; }
-            newNode->next = current->next;
-            current->next->prev = newNode;
-            current->next = newNode;
-            newNode->prev = current;
-        }
-        common_count++;
-    }
-
-    void removeAt(int num) {
-        if (num < 0 || num >= common_count) { return; }
-        Node* node = head;
-        for (int i = 0; i < num; i++) { node = node->next; }
-        if (node == head) {
-            head = head->next;
-            if (head) { head->prev = nullptr; }
-            else tail = nullptr;
-        }
-        else if (node == tail) {
-            tail = node->prev;
-            tail->next = nullptr;
-        }
-        else {
-            node->prev->next = node->next;
-            node->next->prev = node->prev;
-        }
-        delete node;
-        common_count--;
-    }
-
-    T& elementAt(int num) {
-        if (num < 0 || num >= common_count) { throw out_of_range("Index out of range"); }
-
-
-        Node* start = head;
+    Node<T>* go_to(int num) {
+        Node<T>* start = head;
         int steps = num;
         int distance_head = num;
         int distance_tail = common_count - num - 1;
@@ -116,54 +45,153 @@ public:
             start = prevNode;
             steps = prevNum < num ? num - prevNum : prevNum - num;
         }
-        
+
         if (prevNum > num) { while (steps-- > 0) { start = start->prev; } }
         else { while (steps-- > 0) { start = start->next; } }
 
-        // обновляем прошлые значения
-        prevNode = start;
+        return start;
+    }
+
+    void remove(Node<T>* del) {
+        if (del->prev) del->prev->next = del->next;
+        if (del->next) del->next->prev = del->prev;
+        if (prevNode == del) {
+            prevNode = nullptr;
+            prevNum = -1;
+        }
+        delete del;
+        common_count--;
+        if (common_count == 0) {
+            tail = nullptr;
+            head = nullptr;
+        }
+    }
+
+    // Основные функции по List
+    // --------------------------------------------------------------------------------------
+
+    void add(const T& data) {
+        Node<T>* newNode = new Node<T>(data);
+        if (head == nullptr) {
+            head = newNode;
+            tail = newNode;
+        }
+        else {
+            tail->next = newNode;
+            newNode->prev = tail;
+            tail = newNode;
+        }
+        common_count++;
+    }
+
+    void insert(int num, const T& data) {
+        if (num < 0 || num > common_count) { throw out_of_range("Out of range!"); }
+        Node<T>* newNode = new Node<T>(data);
+        if (num == 0) {
+            newNode->next = head;
+            if (head != nullptr) { head->prev = newNode; }
+            else { tail = newNode; }
+            head = newNode;
+        }
+        else if (num == common_count) {
+            tail->next = newNode;
+            newNode->prev = tail;
+            tail = newNode;
+        }
+        else {
+            Node<T>* beforeIns = go_to(num - 1);
+            newNode->next = beforeIns->next;
+            beforeIns->next = newNode;
+            newNode->prev = beforeIns;
+            newNode->next->prev = newNode;
+            prevNode = beforeIns;
+            prevNum = num-1; // В случае, если планируем много раз вставлять элементы
+        }
+        common_count++;
+    }
+
+
+    void removeAt(int num) {
+        if (num < 0 || num >= common_count) { return; }
+        Node<T>* del = go_to(num);
+        if (num == 0) { head = head->next; }
+        if (num == common_count - 1) { tail = tail->prev; }
+        if (prevNode == del) {
+            prevNode = nullptr;
+            prevNum = -1;
+        }
+        remove(del);
+    }
+
+    T& elementAt(int num) {
+        if (num < 0 || num >= common_count) { throw out_of_range("Index out of range"); }
+        Node<T>* element = go_to(num);
+        prevNode = element;
         prevNum = num;
-        
-        return start->data;
+        return element->data;
     }
             
     int count() const { return common_count; }
 
     void clear() {
-        Node* current = head;
+        Node<T>* current = head;
         while (current) {
-            Node* next = current->next;
+            Node<T>* next = current->next;
             delete current;
             current = next;
         }
-        head = tail = nullptr;
+        head = nullptr;
+        tail = nullptr;
         common_count = 0;
     }
 
-    void removeCitiesByRegion(string name) {
-        Node* cur = head;
-        Node* prev = nullptr;
+    // Блок кода для хэш-таблицы, которая для simple_map
+    // ---------------------------------------------------------------------------------------
 
-        while (cur != nullptr) {
-            if (cur->data.region == name) {
-                Node* del = cur;
-                if (prev != nullptr) { prev->next = cur->next; }
+
+    void del_element(const T value) {
+        if (head == nullptr) return;
+        Node<T>* del = head;
+        while (del) {
+            if (del->data == value) {
+                if (del == head) {
+                    head = head->next;
+                    if (del->next) {
+                        del->next->prev = nullptr;
+                        del->next = nullptr;
+                    }
+                }
                 else {
-                    head = cur->next;
-                    if (head) { head->prev = nullptr; }
-                } // если удаляем первый элемент
-                if (cur->next == nullptr) { tail = prev; }
-                else { cur->next->prev = prev; }
-                cur = cur->next;
+                    del->prev->next = del->next;
+                    if (del->next)  del->next->prev = del->prev;
+                }
                 delete del;
                 common_count--;
+                break;
             }
-            else {
-                prev = cur;
-                cur = cur->next;
-            }
+            del = del->next;
         }
     }
+
+    bool look_for(const T value) {
+        if (!head) return false;
+        Node<T>* cur = head;
+        while (cur) {
+            if (cur->data == value) { return true; }
+            cur = cur->next;
+        }
+        return false;
+    }
+
+    Node<T>* look_for_node(const T value) {
+        Node<T>* cur = head;
+        while (cur) {
+            if (cur->data == value) { return cur; }
+            cur = cur->next;
+        }
+        return nullptr;
+    }
+    
 };
 
 

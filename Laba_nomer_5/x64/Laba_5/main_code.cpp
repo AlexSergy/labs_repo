@@ -62,7 +62,7 @@ int main() {
             auto wordsArr = hashSet.toArray();
             cout << "Слова в хеш-таблице: ";
             for (int i = 0; i < count; ++i) {
-                cout << wordsArr[i] << (i < count - 1 ? ", " : "");
+                cout << wordsArr[i] << (i < count - 1 ? ", " : ".");
             }
             cout << "\n";
             delete[] wordsArr; // очистка памяти после использования

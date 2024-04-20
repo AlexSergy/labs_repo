@@ -1,6 +1,7 @@
 #pragma once
-// Добавлены фукнции look_for и del_element
-
+// Добавлены функции look_for и del_element
+// модифицирована функция add
+// Удалены некоторые функции
 
 #include<string>
 #include<stdexcept>
@@ -28,81 +29,7 @@ public:
 
     List() : head(nullptr), tail(nullptr), common_count(0) {}
 
-    void add(const T& data) {
-        // Проверка на то, существует ли уже элемент, если да
-        // то просто выходим из функции
-            Node* current = head;
-        while (current != nullptr) {
-            if (current->data == data) {
-                return; // Если элемент существует, прекращаем добавление.
-            }
-            current = current->next;
-        }
-
-
-        Node* newNode = new Node(data);
-        if (head == nullptr) {
-            head = newNode;
-            tail = newNode;
-        }
-        else {
-            tail->next = newNode;
-            newNode->prev = tail;
-            tail = newNode;
-        }
-        common_count++;
-    }
-
-    void insert(int num, const T& data) {
-        if (num < 0 || num > common_count) { throw out_of_range("Out of range!"); }
-        Node* newNode = new Node(data);
-        if (num == 0) {
-            newNode->next = head;
-            if (head != nullptr) { head->prev = newNode; }
-            else { tail = newNode; }
-            head = newNode;
-        }
-        else if (num == common_count) {
-            tail->next = newNode;
-            newNode->prev = tail;
-            tail = newNode;
-        }
-        else {
-            Node* current = head;
-            for (int i = 0; i < num - 1; i++) { current = current->next; }
-            newNode->next = current->next;
-            current->next->prev = newNode;
-            current->next = newNode;
-            newNode->prev = current;
-        }
-        common_count++;
-    }
-
-    void removeAt(int num) {
-        if (num < 0 || num >= common_count) { return; }
-        Node* node = head;
-        for (int i = 0; i < num; i++) { node = node->next; }
-        if (node == head) {
-            head = head->next;
-            if (head) { head->prev = nullptr; }
-            else tail = nullptr;
-        }
-        else if (node == tail) {
-            tail = node->prev;
-            tail->next = nullptr;
-        }
-        else {
-            node->prev->next = node->next;
-            node->next->prev = node->prev;
-        }
-        delete node;
-        common_count--;
-    }
-
-    T& elementAt(int num) {
-        if (num < 0 || num >= common_count) { throw out_of_range("Index out of range"); }
-        if (head == nullptr) { throw logic_error("Empty list"); }
-
+    Node* go_to(int num) {
         Node* start = head;
         int steps = num;
         int distance_head = num;
@@ -127,11 +54,40 @@ public:
         if (prevNum > num) { while (steps-- > 0) { start = start->prev; } }
         else { while (steps-- > 0) { start = start->next; } }
 
-        // обновляем прошлые значения
-        prevNode = start;
-        prevNum = num;
+        return start;
+    }
 
-        return start->data;
+    void add(const T& data) {
+        // Проверка на то, существует ли уже элемент, если да
+        // то просто выходим из функции
+            Node* current = head;
+        while (current != nullptr) {
+            if (current->data == data) {
+                return; // Если элемент существует, прекращаем добавление.
+            }
+            current = current->next;
+        }
+
+
+        Node* newNode = new Node(data);
+        if (head == nullptr) {
+            head = newNode;
+            tail = newNode;
+        }
+        else {
+            tail->next = newNode;
+            newNode->prev = tail;
+            tail = newNode;
+        }
+        common_count++;
+    }    
+
+    T& elementAt(int num) {
+        if (num < 0 || num >= common_count) { throw out_of_range("Index out of range"); }
+        Node* element = go_to(num);
+        prevNode = element;
+        prevNum = num;
+        return element->data;
     }
 
     int count() const { return common_count; }
@@ -146,7 +102,6 @@ public:
         head = tail = nullptr;
         common_count = 0;
     }
-
 
     void del_element(const T value) {
         if (head == nullptr) return;

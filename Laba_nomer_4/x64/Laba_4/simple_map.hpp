@@ -1,133 +1,97 @@
 // САМОДЕЛЬНАЯ СТРУКТУРА MAP
 #pragma once
+#include"HashSet.hpp"
+#include<stdexcept>
 
-
+using namespace std;
 
 template<typename K, typename V>
 class simple_map {
 public:
+	HashSet<K, V> hashset;
+	
 
-	struct Nodemap {
-		K key;
-		V value;
-		Nodemap* next;
-
-		Nodemap(const K& key, const V& value, Nodemap* next) : key(key), value(value), next(next) {}
-	};
-
-	Nodemap* head;
-
-	simple_map() : head(nullptr) {}
-	~simple_map() { clear(); }
-
-	void insert(K key, V value) {
-		if (!head) {
-			head = new Nodemap(key, value, nullptr);
+	void insert(const K& key, const V& value) {
+		if (hashset.contains(key)) {
+			V& newValue = getValue(key);
+			newValue += value;
 			return;
 		}
-		Nodemap** node = &head;
-		while (*node && (*node)->key != key) { node = &(*node)->next; }
-		if (*node) { (*node)->value += value; }
-		else { *node = new Nodemap{ key, value, nullptr }; }
-	}
-
-	void remove(const K& key) {
-		Nodemap** node = &head;
-		while (*node && (*node)->key != key) { node = &(*node)->next; }
-		if (*node) {
-			Nodemap* del = *node;
-			*node = (*node)->next;
-			delete del;
-		}
-	}
-
-	// Большой блок сортировкой слиянием
-	// разделение списка и возврат среднего элемента
-	Nodemap* split(Nodemap* start) {
-		Nodemap* fast = start;
-		Nodemap* slow = start;
-		while (fast->next && fast->next->next) {
-			fast = fast->next->next;
-			slow = slow->next;
-		}
-		Nodemap* middle = slow->next;
-		slow->next = nullptr;
-		return middle;
-	}
-
-	// Слияние двух отсортированных списков
-	Nodemap* merge(Nodemap* first, Nodemap* second) {
-		// Если один из списков пуст, возвращаем другой
-		if (!first) return second;
-		if (!second) return first;
-
-		if (first->value > second->value) { // sort в порядке убывания
-			first->next = merge(first->next, second);
-			return first;
-		}
 		else {
-			second->next = merge(first, second->next);
-			return second;
+			Pair<K, V> pair(key, value);
+			hashset.add(pair);
 		}
 	}
 
-	// Сама сортировка
-	Nodemap* mergeSort(Nodemap* start) {
-		if (!start || !start->next) return start;
-
-		Nodemap* middle = split(start);
-		Nodemap* left = mergeSort(start);
-		Nodemap* right = mergeSort(middle);
-
-		return merge(left, right);
+	bool contains(const K& key) {
+		return hashset.contains(key);
 	}
+	int count() { return hashset.count(); }
 
-	// итоговая функция
-	void sort() { head = mergeSort(head); }
+	// Я забыл про то, что у меня была эта функция, прошу прощения:)
+	void remove(const K& key) { hashset.remove(key); }
 
-	// Удаление некоторого элемента
-	void removeRegion(const K& name) {
-		Nodemap** node = &head;
-		while (*node) {
-			Nodemap* del = *node;
-			if (del->key == name) {
-				*node = del->next;
-				delete del;
-				break;
+	void merge(Pair<K, V>* arr, int left, int middle, int right) {
+		int n1 = middle - left + 1;
+		int n2 = right - middle;
+
+		Pair<K, V>* L = new Pair<K, V>[n1];
+		Pair<K, V>* R = new Pair<K, V>[n2];
+
+		// копируем все в временные массивы
+		for (int i = 0; i < n1; i++) { L[i] = arr[left + i]; }
+		for (int j = 0; j < n2; j++) { R[j] = arr[middle + 1 + j]; }
+
+		// Сливаем временные массивы обратно
+		int i = 0, j = 0, k = 0;
+		while (i < n1 && j < n2) {
+			if (L[i].value >= R[j].value) {
+				arr[k] = L[i];
+				i++;
 			}
-			node = &(del->next);
+			else { 
+				arr[k] = R[j];
+				j++;
+			}
+			k++;
 		}
+
+		// Если остались элементы, копируем оставшееся
+		while (i < n1) {
+			arr[k] = L[i];
+			i++;
+			k++;
+		}
+		while (j < n2) {
+			arr[k] = R[j];
+			j++;
+			k++;
+		}
+
+		delete[] L;
+		delete[] R;
 	}
 
+	void mergeSort(Pair<K, V>* arr, int left, int right) {
+		if (left < right) {
+			int middle = left + (right - left) / 2;
+			mergeSort(arr, left, middle);
+			mergeSort(arr, middle + 1, right);
+			merge(arr, left, middle, right);
+		}
+	}
+	
 	// Для четвертой лабы. Уменьшение населения некоторого региона.
-	void remove_population(const K& region, const V& population) {
-		Nodemap** node = &head;
-		while (*node) {
-			if ((*node)->key == region) {
-				if ((*node)->value >= population) { (*node)->value -= population; }
-				else { remove(region); }
-				// if население города больше или равно, чем региона, удаляем регион
-				// на всякий случай, чтобы в map не было отр. значений
-				return;
-			}
-			node = &(*node)->next;
-		}
+	void remove_population(const K& key, const V& population) { 
+		Pair<K, V> pair;
+		hashset[hashset.hashFoo(key)].look_for_node(pair)->data.value -= population;
 	}
 
-	V getValue(const K& key) { // Возвращает значения по ключу
-		Nodemap* cur = head;
-		while (cur != nullptr) {
-			if (cur->key == key) { return cur->value; }
-			cur = cur->next;
-		}
-		throw out_of_range("Key not found!");
+	V& getValue(const K& key) { // Возвращает значения по ключу
+		Pair<K, V> pair(key, V());
+		if (hashset[hashset.hashFoo(key)].look_for_node(pair)) { return hashset[hashset.hashFoo(key)].look_for_node(pair)->data.value; }
+		else { throw out_of_range("Ключ не найден"); }
 	}
 
-	void clear() {
-		while (head) {
-			Nodemap* temp = head;
-			head = head->next;
-			delete temp;
-		}
-	}
+	void clear() { hashset.clear; }
 };
