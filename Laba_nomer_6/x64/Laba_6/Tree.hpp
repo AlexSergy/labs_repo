@@ -26,17 +26,14 @@ private:
 	}
 
 	void delNode(Node* del, Node* parent) {
-		if (!del->left + !del->right >= 1) {
+		if (!del->left + !del->right == 1) {
 			Node* temp = !del->left ? del->right : del->left;
 			if (parent) {
 				if (parent->left == del) parent->left = temp;
 				else parent->right = temp;
 			} else { root = temp; }
-			delete del;
-			del = temp;
-			size--;
 		}
-		else {
+		else if (del->left && del->right) {
 			Node* min = minNode(del->right);
 			Node* minParent = min->parent;
 			if (minParent != del) {
@@ -57,10 +54,16 @@ private:
 			}
 			else { root = min; }
 			min->parent = parent;
-			delete del;
-			del = min;
-			size--;
 		}
+		else {
+			if (parent) {
+				if (parent->left == del) { parent->left = nullptr; }
+				else parent->right = nullptr;
+			}
+			else root = nullptr;
+		}
+		delete del;
+		size--;
 	}
 
 	void clear(Node* node) {
