@@ -16,7 +16,7 @@ public:
 	List<Pair<K, V>>*  arr;
 	float load_factor;
 	size_t element_count;
-	
+
 	List<Pair<K, V>>& operator[](int index) { 
 		if (index > size) { throw out_of_range("Ошибка индекса."); } // На всякий случай
 		return arr[index];
@@ -95,5 +95,12 @@ public:
 			}
 		}
 		return set_of_strings;
+	}
+
+	V& getValueForKey(const K& key) {
+		Pair<K, V> pair(key, V());
+		Node<Pair<K, V>>* n = arr[hashFoo(pair.key)].look_for_node(pair);
+		if (n) return n->data.value;
+		else throw out_of_range("Key not found");
 	}
 };

@@ -1,17 +1,21 @@
 #pragma once
-
-
-#include<string>
 #include<stdexcept>
 #include"Node.hpp"
-
 using namespace std;
-
-
 
 template <typename T>
 class List {
 public:
+    /*
+    struct Node {
+        T data;
+        Node* prev;
+        Node* next;
+
+        Node(const T& value) : data(value), prev(nullptr), next(nullptr) {}
+    };
+    */
+
     Node<T>* head;
     Node<T>* tail;
     int common_count;
@@ -138,7 +142,7 @@ public:
         common_count = 0;
     }
 
-    // Блок кода для хэш-таблицы, которая для simple_map
+    // Блок кода для хэш-таблицы
     // ---------------------------------------------------------------------------------------
 
 

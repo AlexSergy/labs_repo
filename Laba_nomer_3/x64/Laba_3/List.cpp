@@ -12,13 +12,14 @@ class List {
 public:
 	Node* head = nullptr;
 	Node* flag = nullptr;
+	Node* tail = nullptr;
 	int common_count = 0;
 	int num_flag = -1;
 
 	Node* go_to(int num) {
 		if (!head) { throw out_of_range("Empty list"); }
-		if (num == -1) { return go_to(common_count - 1); }
-		num = (num % common_count);
+		if (num == -1) { return tail; }
+		if (common_count!=0) num %= common_count;
 		Node* start = head;
 		int steps = num;
 		int distance_flag = flag ? num - num_flag : INT_MAX;
@@ -35,34 +36,35 @@ public:
 
 	void flag_check(int num) {
 		if (num < num_flag) { num_flag--; } // условия для num_flag
-		if (num == num_flag) { flag = flag->next; }
+		if (num == num_flag) { 
+			flag = flag->next;
+			++num_flag %= common_count;
+		}
 	}
 
 	void add(int value) {
 		Node* newNode = new Node(value);
 		if (head == nullptr) { head = newNode; newNode->next = head; }
 		else {
-			Node* last = go_to(common_count-1);
+			Node* last = tail;
 			last->next = newNode;
 			newNode->next = head;
 		}
+		tail = newNode;
 		common_count++;
 	}
-	/*
-	void Del(Node* prev, Node* del, int index) {
-
-	}*/
 
 	void insert(int num, int value) {
 		if (!head && num > 0) { return; }
-		if (common_count == 0 || num == common_count) { 
+		if (common_count == 0 || num == common_count) {
 			add(value);
 			return;
 		}
+		if (common_count!=0) num %= common_count;
 		Node* newNode = new Node(value);
 		Node* cur = nullptr;
 		if (num == 0) { 
-			cur = go_to(common_count-1);
+			cur = tail;
 			head = newNode;
 		}
 		else { cur = go_to(num-1); }
@@ -78,6 +80,7 @@ public:
 		Node* del = nullptr;
 		beforeDel = go_to(num - 1);
 		if (num == 0) { head = common_count > 1 ? head->next : nullptr; }
+		if (num == common_count - 1) { tail = common_count > 1 ? go_to(common_count - 2) : nullptr; }
 		del = beforeDel->next;
 		beforeDel->next = del->next;
 		delete del;
@@ -90,7 +93,7 @@ public:
 
 	void insertBeforeNegative() {
 		if (!head) { return; }
-		Node* prev = go_to(common_count-1);
+		Node* prev = tail;
 		Node* cur = prev->next;
 		int count = common_count;
 
@@ -112,21 +115,24 @@ public:
 	void removeNegative() {
 		if (!head) { return; }
 		Node* cur = head;
-		Node* prev = go_to(common_count-1);
+		Node* prev = tail;
 		int count = common_count;
 		for (int i = 0; i < count; i++) {
 			if (cur->data < 0) {
 				prev->next = cur->next;
 				if (cur == head) { head = head->next; }
+				if (cur == tail) tail = prev;
+				flag_check(i);
 				delete cur;
 				if (common_count != 1) { cur = prev->next; }
 				else {
 					head = nullptr;
+					tail = nullptr;
 					flag = nullptr;
 					num_flag = -1;
 				}
 				common_count--;
-				flag_check(i);
+				
 			}
 			else {
 				prev = cur;
@@ -157,6 +163,7 @@ public:
 			current = nextNode;
 		} while (current != head);
 		head = nullptr;
+		tail = nullptr;
 		flag = nullptr;
 		common_count = 0;
 		num_flag = -1;

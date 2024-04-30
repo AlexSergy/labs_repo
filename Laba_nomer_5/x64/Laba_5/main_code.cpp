@@ -59,7 +59,7 @@ int main() {
             break;
         case 6: {
             int count = hashSet.count();
-            auto wordsArr = hashSet.toArray();
+            auto wordsArr = hashSet.ToArray();
             cout << "Слова в хеш-таблице: ";
             for (int i = 0; i < count; ++i) {
                 cout << wordsArr[i] << (i < count - 1 ? ", " : ".");
