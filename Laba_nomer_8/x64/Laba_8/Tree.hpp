@@ -74,11 +74,12 @@ public:
 		size--;
 	}
 
-	void clear(Node*& node) {
+	void clear_(Node*& node) {
 		if (node) {
-			clear(node->l);
-			clear(node->r);
+			clear_(node->l);
+			clear_(node->r);
 			delete node;
+			node = nullptr;
 		}
 	}
 
@@ -95,22 +96,22 @@ public:
 
 	void rotate(Node*& n, bool left) {
 		if (!n) return;
-		Node* x = left ? n->l : n->r;
+		Node* x = left ? n->r : n->l;
 		if (!x) return;
-		if (n->p) {
-			if (left) n->p->l = x;
-			else n->p->r = x;
-		}
 		x->p = n->p;
-		if (left) {
-			n->l = x->r;
-			if (x->r) x->r->p = n;
-			x->r = n;
+		if (n->p) {
+			if (n->p->l == n) n->p->l = x; 
+			else if (n->p->r == n) n->p->r = x; 
 		}
-		else {
+		if (left) {
 			n->r = x->l;
 			if (x->l) x->l->p = n;
 			x->l = n;
+		}
+		else {
+			n->l = x->r;
+			if (x->r) x->r->p = n;
+			x->r = n;
 		}
 		n->p = x;
 		if (!x->p) root = x;
@@ -182,7 +183,7 @@ public:
 
 	// здесь был public
 
-	~Tree() { clear(root); }
+	~Tree() { clear(); }
 	
 
 	void add(int v) {
@@ -207,7 +208,7 @@ public:
 	}
 
 	void clear() {
-		clear(root);
+		clear_(root);
 		root = nullptr;
 		size = 0;
 	}

@@ -11,7 +11,7 @@ struct Node {
 };
 
 struct Tree {
-private:
+public:
 	enum Order { Prefix, Infix, Postfix };
 	int size = 0;
 	Node* root = nullptr;
@@ -93,22 +93,22 @@ private:
 
 	void rotate(Node*& n, bool left) {
 		if (!n) return;
-		Node* x = left ? n->l : n->r;
+		Node* x = left ? n->r : n->l;
 		if (!x) return;
-		if (n->p) {
-			if (left) n->p->l = x;
-			else n->p->r = x;
-		}
 		x->p = n->p;
-		if (left) {
-			n->l = x->r;
-			if (x->r) x->r->p = n;
-			x->r = n;
+		if (n->p) {
+			if (n->p->l == n) n->p->l = x;
+			else if (n->p->r == n) n->p->r = x;
 		}
-		else {
+		if (left) {
 			n->r = x->l;
 			if (x->l) x->l->p = n;
 			x->l = n;
+		}
+		else {
+			n->l = x->r;
+			if (x->r) x->r->p = n;
+			x->r = n;
 		}
 		n->p = x;
 		if (!x->p) root = x;
@@ -141,7 +141,6 @@ private:
 		return arr;
 	}
 
-public:
 	~Tree() { clear(root); }
 
 	void add(int v) {

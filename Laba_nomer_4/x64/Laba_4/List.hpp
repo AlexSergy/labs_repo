@@ -180,13 +180,13 @@ public:
         return false;
     }
 
-    Node<T>* look_for_node(const T value) {
+    T& look_for_node(const T value) {
         Node<T>* cur = head;
         while (cur) {
-            if (cur->data == value) { return cur; }
+            if (cur->data == value) { return cur->data; }
             cur = cur->next;
         }
-        return nullptr;
+        throw out_of_range("Node not found");
     }
     
 };

@@ -22,9 +22,7 @@ public:
 		return arr[index];
 	}
 
-	HashSet(size_t initial_size = 25) : size(initial_size), load_factor(0.75), element_count(0) {
-		arr = new List<Pair<K, V>>[size];
-	}
+	HashSet(size_t initial_size = 25) : size(initial_size), load_factor(0.75), element_count(0) { arr = new List<Pair<K, V>>[size]; }
 	~HashSet() {
 		clear();
 		delete[] arr;
@@ -97,10 +95,5 @@ public:
 		return set_of_strings;
 	}
 
-	V& getValueForKey(const K& key) {
-		Pair<K, V> pair(key, V());
-		Node<Pair<K, V>>* n = arr[hashFoo(pair.key)].look_for_node(pair);
-		if (n) return n->data.value;
-		else throw out_of_range("Key not found");
-	}
+	V& getValueForKey(const K key) { return arr[hashFoo(key)].look_for_node(Pair<K, V>(key, V())).value; }
 };

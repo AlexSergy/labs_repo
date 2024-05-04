@@ -56,11 +56,12 @@ public:
 
 	void insert(int num, int value) {
 		if (!head && num > 0) { return; }
-		if (common_count == 0 || num == common_count) {
+		if (common_count != 0) num %= common_count; 
+		// index is converted to the range from 0 to common_count-1 
+		if (common_count == 0) {
 			add(value);
 			return;
 		}
-		if (common_count!=0) num %= common_count;
 		Node* newNode = new Node(value);
 		Node* cur = nullptr;
 		if (num == 0) { 

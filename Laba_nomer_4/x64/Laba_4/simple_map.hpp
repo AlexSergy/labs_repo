@@ -12,8 +12,7 @@ public:
 
 	void insert(const K& key, const V& value) {
 		if (hashset.contains(key)) {
-			V& newValue = getValue(key);
-			newValue += value;
+			hashset.getValueForKey(key) += value;
 			return;
 		}
 		else {
@@ -22,22 +21,9 @@ public:
 		}
 	}
 
-	bool contains(const K& key) {
-		return hashset.contains(key);
-	}
+	bool contains(const K& key) { return hashset.contains(key); }
 	int count() { return hashset.count(); }
-
-	// Я забыл про то, что у меня была эта функция, прошу прощения:)
 	void remove(const K& key) { hashset.remove(key); }
-	
-	
-	// Для четвертой лабы. Уменьшение населения некоторого региона.
-	void remove_population(const K& key, const V& population) {
-		V& value = hashset.getValueForKey(key);
-		value -= population;
-	}
-
-	V& getValue(const K& key) { return hashset.getValueForKey(key); }
-
+	void update_population(const K& key, const V& population) { hashset.getValueForKey(key) -= population; }
 	void clear() { hashset.clear; }
 };
