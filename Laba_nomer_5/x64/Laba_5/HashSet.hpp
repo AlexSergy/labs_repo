@@ -26,15 +26,15 @@ private:
 public:
 	HashSet() : arr(make_unique<List<string>[]>(size)) {}
 
-	void add(const string& value) { arr[hash(value)].a(value); }
+	void add(const string& value) { arr[hash(value)].add(value); }
 
-	void remove(const string& value) { arr[hash(value)].r(value); }
+	void remove(const string& value) { arr[hash(value)].remove(value); }
 
-	bool contains(const string& value) { return arr[hash(value)].con(value); }
+	bool contains(const string& value) { return arr[hash(value)].contains(value); }
 
 	int count() {
 		int common_count = 0;
-		for (int i = 0; i < size; i++) { common_count += arr[i].s(); }
+		for (int i = 0; i < size; i++) { common_count += arr[i].size(); }
 		return common_count;
 	}
 
@@ -46,8 +46,8 @@ public:
 		int idx = 0;
 		if (cnt != 0) {
 			for (int i = 0; i < size; i++) {
-				for (int j = 0; j < arr[i].s(); j++)
-					result[idx++] = arr[i].e(j);
+				for (int j = 0; j < arr[i].size(); j++)
+					result[idx++] = arr[i].element(j);
 			}
 		}
 		return result;

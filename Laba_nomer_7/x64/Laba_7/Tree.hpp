@@ -31,7 +31,7 @@ public:
 		return node;
 	}
 
-	void delNode(Node*& del, Node*& p) {
+	void delNode(Node* del, Node*& p) {
 		if (!del->l + !del->r == 1) {
 			Node* temp = del->l ? del->l : del->r;
 			if (p) {
@@ -70,6 +70,7 @@ public:
 			}
 			else root = nullptr;
 		}
+		if (del) { del->l = del->p = del->r = nullptr; } // на всякий случай
 		delete del;
 		size--;
 	}
@@ -82,7 +83,7 @@ public:
 		}
 	}
 
-	void traverse(Node*& n, int*& arr, int& i, Order o) {
+	void traverse(Node* n, int*& arr, int& i, Order o) {
 		if (!n) return;
 		if (o == Prefix) { arr[i++] = n->value; }
 		traverse(n->l, arr, i, o);
@@ -91,7 +92,7 @@ public:
 		if (o == Postfix) { arr[i++] = n->value; }
 	}
 
-	void rotate(Node*& n, bool left) {
+	void rotate(Node* n, bool left) { 
 		if (!n) return;
 		Node* x = left ? n->r : n->l;
 		if (!x) return;
@@ -112,7 +113,6 @@ public:
 		}
 		n->p = x;
 		if (!x->p) root = x;
-		n = x;
 	}
 
 	Node* findAndRotate(Node*& n, int v, bool left) {
@@ -134,7 +134,7 @@ public:
 		return n;
 	}
 
-	int* ToArray(Order o = Infix) {
+	int* To_Array(Order o = Infix) {
 		int i = 0;
 		int* arr = new int[size];
 		traverse(root, arr, i, o);
@@ -180,6 +180,6 @@ public:
 	void ToLeft(int v) { findAndRotate(root, v, true); }
 	void ToRight(int v) { findAndRotate(root, v, false); }
 	void Balance() { root = balance(root); }
-	int* ToArray(Order o) { return ToArray(o); }
-	int* ToArray() { return ToArray(Infix); }
+	int* ToArray(Order o) { return To_Array(o); }
+	int* ToArray() { return To_Array(Infix); }
 };

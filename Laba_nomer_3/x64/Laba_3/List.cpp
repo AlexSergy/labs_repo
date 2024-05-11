@@ -44,7 +44,7 @@ public:
 
 	void add(int value) {
 		Node* newNode = new Node(value);
-		if (head == nullptr) { head = newNode; newNode->next = head; }
+		if (!head) { head = newNode; newNode->next = head; }
 		else {
 			Node* last = tail;
 			last->next = newNode;
@@ -56,12 +56,12 @@ public:
 
 	void insert(int num, int value) {
 		if (!head && num > 0) { return; }
-		if (common_count != 0) num %= common_count; 
-		// index is converted to the range from 0 to common_count-1 
-		if (common_count == 0) {
+		if (common_count == 0 || num == common_count) {
 			add(value);
 			return;
 		}
+		if (common_count != 0) num %= common_count; 
+		// index is converted to the range from 0 to common_count-1 
 		Node* newNode = new Node(value);
 		Node* cur = nullptr;
 		if (num == 0) { 

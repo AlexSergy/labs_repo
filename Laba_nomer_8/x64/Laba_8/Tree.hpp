@@ -31,7 +31,7 @@ public:
 		return node;
 	}
 
-	void delNode(Node*& del, Node*& p) {
+	void delNode(Node* del, Node*& p) {
 		if (!del->l + !del->r == 1) {
 			Node* temp = del->l ? del->l : del->r;
 			if (p) {
@@ -70,6 +70,7 @@ public:
 			}
 			else root = nullptr;
 		}
+		if (del) { del->l = del->p = del->r = nullptr; } // на всякий случай
 		delete del;
 		size--;
 	}
@@ -94,14 +95,14 @@ public:
 
 	int sizeTree(Node* n) { return n ? sizeTree(n->l) + sizeTree(n->r) + 1 : 0; }
 
-	void rotate(Node*& n, bool left) {
+	void rotate(Node* n, bool left) {
 		if (!n) return;
 		Node* x = left ? n->r : n->l;
 		if (!x) return;
 		x->p = n->p;
 		if (n->p) {
-			if (n->p->l == n) n->p->l = x; 
-			else if (n->p->r == n) n->p->r = x; 
+			if (n->p->l == n) n->p->l = x;
+			else if (n->p->r == n) n->p->r = x;
 		}
 		if (left) {
 			n->r = x->l;
@@ -115,7 +116,6 @@ public:
 		}
 		n->p = x;
 		if (!x->p) root = x;
-		n = x;
 	}
 
 	Node* findAndRotate(Node*& n, int v, bool left) {

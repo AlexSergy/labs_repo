@@ -4,7 +4,7 @@
 
 using namespace std;
 
-int main() {
+int main1() {
 	setlocale(LC_ALL, "ru");
 	List L;
 	int choice, value;
