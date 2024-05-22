@@ -23,19 +23,4 @@ struct Pair {
 	bool operator<(const Pair& other) const { return key < other.key; } // оператор < будет сравнивает ФИО по алфавитному порядку
 	// Возможно сравнение здесь и нужно
 	// если тип не поддерживает сравнение, компилятор сообщит об этом
-	/*
-	bool operator<=(const Pair<K, V>& other) const { return value <= other.value; }
-	bool operator>=(const Pair<K, V>& other) const { return value >= other.value; }
-	bool operator==(const Pair<K, V>& other) const { return key == other.key; }
-	bool operator+=(const V& other) {
-		value += other;
-		return *this;
-	}
-	bool operator-=(const V& other) {
-		value -= other;
-		return *this;
-	}
-	bool operator+(const V& other) const { return Pair(key, value + other); }
-	bool operator-(const V& other) const { return Pair(key, value - other); }
-	*/
 };

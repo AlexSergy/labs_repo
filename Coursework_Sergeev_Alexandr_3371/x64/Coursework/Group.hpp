@@ -9,7 +9,7 @@ public:
     string groupNumber;
     Student* head;
     Student* tail;
-    int common_count;
+    int common_count = 0;
     Student* prevNode = nullptr;
     int prevNum = -1;
     //float Average_score = 0;
@@ -21,6 +21,53 @@ public:
     // Блок кода с дополнительными функциями
     // --------------------------------------------------------------------------------
 
+    Student* forward(Student* start, int steps) {
+        if (!start) return nullptr;
+        while (steps-- && start->next) start = start->next;
+        return start;
+    }
+
+    Student* backward(Student* start, int steps) {
+        if (!start) return nullptr;
+        while (steps-- && start->prev) start = start->prev;
+        return start;
+    }
+
+    Student* go_to(int index) {
+        if (!head) return nullptr;  
+        Student* start = head; 
+        int steps = 0;
+        int forward_distance = index;
+        int backward_distance = common_count - index - 1;
+        int prev_distance = (prevNode) ? abs(prevNum - index) : INT_MAX; 
+
+        if (forward_distance <= min(backward_distance, prev_distance)) {
+            start = head;
+            steps = forward_distance;
+            prevNode = forward(start, steps);
+        }
+        else if (backward_distance < min(forward_distance, prev_distance)) {
+            start = tail;  
+            steps = backward_distance;
+            prevNode = backward(start, steps);
+        }
+        else {
+            start = prevNode;
+            steps = abs(prevNum - index);
+            prevNode = forward(start, steps);
+        }
+        prevNum = index;
+        return prevNode;
+    }
+
+    void updateGroup(string newGroup) {
+        Student* cur = head;
+        while (cur) {
+            cur->data.value.groupNumber = newGroup;
+            cur = cur->next;
+        }
+    }
+    /*
     Student* go_to(int num) {
         Student* start = head;
         int steps = num;
@@ -43,11 +90,12 @@ public:
             steps = prevNum < num ? num - prevNum : prevNum - num;
         }
 
-        if (prevNum > num) { while (steps-- > 0) { start = start->prev; } }
-        else { while (steps-- > 0) { start = start->next; } }
+        if (prevNum > num) { while (steps-- > 0) { if (start) start = start->prev; } }
+        else { while (steps-- > 0) { if (start) start = start->next; } }
 
         return start;
     }
+    */
 
     void remove(Student* del) {
         Student* cur = head; int x = 0;
@@ -67,7 +115,12 @@ public:
         else { prevNum = (x < prevNum) ? --prevNum : prevNum; }
         delete cur;
         common_count--;
-        if (common_count == 0) { zeroing(); }
+        if (common_count == 0) { 
+            head = tail = prevNode = nullptr;
+            groupNumber = "0";
+            common_count = 0;
+            prevNum = -1;
+        }
     }
 
     // Основные функции по List
@@ -116,12 +169,6 @@ public:
         common_count++;
     }
 
-    void zeroing() {
-        head = tail = prevNode = nullptr;
-        groupNumber = "0";
-        common_count = 0;
-        prevNum = -1;
-    }
 
     void removeAt(int num) {
         if (num < 0 || num >= common_count) { return; }
@@ -143,13 +190,17 @@ public:
     int count() const { return common_count; }
 
     void clear() {
-        Student* current = head;
-        while (current) {
-            Student* next = current->next;
-            delete current;
-            current = next;
+        Student* cur = head;
+        while (cur) {
+            Student* next = cur->next;
+            cur->next = cur->prev = nullptr;
+            delete cur;
+            cur = next;
         }
-        zeroing();
+        head = nullptr; tail = nullptr; prevNode = nullptr;
+        groupNumber = "0";
+        common_count = 0;
+        prevNum = -1;
     }
 
     // ---------------------------------------------------------------------------------------
@@ -173,7 +224,12 @@ public:
                 }
                 delete del;
                 common_count--;
-                if (!common_count) { zeroing(); }
+                if (!common_count) { 
+                    head = tail = prevNode = nullptr;
+                    groupNumber = "0";
+                    common_count = 0;
+                    prevNum = -1;
+                }
                 break;
             }
             del = del->next;

@@ -11,13 +11,13 @@ using namespace std;
 
 
 struct Pair_for_sort {
-	string group;
-	float grade;
+	string first;
+	float second;
 
-	Pair_for_sort() : group(), grade() {}
-	Pair_for_sort(const string& key, const float& value) : group(key), grade(value) {}
+	Pair_for_sort() : first(), second() {}
+	Pair_for_sort(const string& key, const float& value) : first(key), second(value) {}
 
-	Pair_for_sort& operator=(const Pair_for_sort& other) { group = other.group; grade = other.grade; return *this; }
+	Pair_for_sort& operator=(const Pair_for_sort& other) { first = other.first; second = other.second; return *this; }
 };
 
 
@@ -143,8 +143,8 @@ public:
 		Pair_for_sort* av_grades = new Pair_for_sort[get_count_of_groups()];
 		for (int i = 0; i < size; i++) {
 			if (arr[i].count() > 0) {
-				av_grades[j].group = arr[i].groupNumber;
-				av_grades[j++].grade = arr[i].updateAverageScore();
+				av_grades[j].first = arr[i].groupNumber;
+				av_grades[j++].second = arr[i].updateAverageScore();
 			}
 		}
 		return av_grades;

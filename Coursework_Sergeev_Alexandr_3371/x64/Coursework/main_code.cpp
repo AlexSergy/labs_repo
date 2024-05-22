@@ -4,6 +4,7 @@
 #include<iostream>
 #include<fstream>
 #include<string>
+#include<algorithm>
 
 using namespace std;
 
@@ -26,24 +27,17 @@ void printMenu() {
 	cout << "13 - Сохранить данные о потоке в файл.\n";
 	cout << "Любой другой символ - закончить программу.\n";
 	cout << "--------------------------------------------------------------------\n";
+	cout << "Примечание! Номер телефона вводить вместе с '+'!\n";
+	cout << "--------------------------------------------------------------------\n";
 }
 
-void Student_output(int count, Student* array) {
-	for (int i = 0; i < count; i++) {
-		cout << "ФИО: " << array[i].data.key << " | ";
-		cout << " Телефон: " << array[i].data.value.phoneNumber << " | ";
-		cout << " Группа: " << array[i].data.value.groupNumber << " | ";
-		cout << " Оценки: "; for (int j = 0; j < 5; j++) { cout << " " << array[i].data.value.arr[j] << " "; } cout << " | ";
-		cout << " Стипендия: " << array[i].data.value.scholarship << " рублей.\n";
-	}
-}
-
-void merge(Pair_for_sort* arr, int left, int middle, int right) {
+template <typename G>
+void merge(G* arr, int left, int middle, int right) {
 	int n1 = middle - left + 1;
 	int n2 = right - middle;
 
-	Pair_for_sort* L = new Pair_for_sort[n1];
-	Pair_for_sort* R = new Pair_for_sort[n2];
+	G* L = new G[n1];
+	G* R = new G[n2];
 
 	// копируем все в временные массивы
 	for (int i = 0; i < n1; i++) { L[i] = arr[left + i]; }
@@ -52,7 +46,7 @@ void merge(Pair_for_sort* arr, int left, int middle, int right) {
 	// Сливаем временные массивы обратно
 	int i = 0, j = 0, k = left;
 	while (i < n1 && j < n2) {
-		if (L[i].grade >= R[j].grade) {
+		if (L[i].second >= R[j].second) {
 			arr[k] = L[i];
 			i++;
 		}
@@ -79,7 +73,8 @@ void merge(Pair_for_sort* arr, int left, int middle, int right) {
 	delete[] R;
 }
 
-void mergeSort(Pair_for_sort* arr, int left, int right) {
+template <typename G>
+void mergeSort(G* arr, int left, int right) {
 	if (left < right) {
 		int middle = left + (right - left) / 2;
 		mergeSort(arr, left, middle);
@@ -88,7 +83,113 @@ void mergeSort(Pair_for_sort* arr, int left, int right) {
 	}
 }
 
+string normalizeName(const string& name) {
+	string normalized = name;
+	transform(normalized.begin(), normalized.end(), normalized.begin(), ::tolower);
+	normalized.erase(remove_if(normalized.begin(), normalized.end(), ::isspace), normalized.end());
+	return normalized;
+}
 
+void rankAndPrintStudents(Flow& flow, const Student& inputStudent) {
+	Group temp;
+	Student* allStudents = flow.toArray();
+	int count = flow.element_count;
+	pair<int, int>* rankedIndexes = new pair<int, int>[count];
+
+	for (int i = 0; i < count; i++) {
+		int rank = 0;
+		if (normalizeName(allStudents[i].data.key) == normalizeName(inputStudent.data.key)) { rank += 5; }
+		if (allStudents[i].data.value.groupNumber == inputStudent.data.value.groupNumber) { rank += 2; }
+		if (allStudents[i].data.value.arr == inputStudent.data.value.arr) { rank += 2; }
+		if (allStudents[i].data.value.scholarship == inputStudent.data.value.scholarship) { rank += 2; }
+		if (allStudents[i].data.value.phoneNumber == inputStudent.data.value.phoneNumber) { rank += 7; }
+		if (rank > 1) {
+			Student rankedStudent(allStudents[i]);
+			temp.add(rankedStudent);
+			rankedIndexes[temp.common_count - 1] = make_pair(temp.common_count - 1, rank);
+		}
+	}
+	delete[] allStudents;
+
+	// simple sorting tempGroup by descending compatibility rating
+	mergeSort(rankedIndexes, 0, temp.common_count - 1);
+	cout << "\nВсе студенты, подходящие под входные данные в ранжированном порядке\n";
+
+	for (int m = 0; m < temp.common_count; m++) {
+		int index = rankedIndexes[m].first;
+		Student* current = temp.go_to(index);
+		if (current != nullptr) {
+			cout << "ФИО: " << current->data.key << ". ";
+			cout << "Группа: " << current->data.value.groupNumber << ". ";
+			cout << "Оценки: ";
+			for (int j = 0; j < 5; j++) {
+				cout << current->data.value.arr[j] << " ";
+			}
+			cout << "Стипендия: " << current->data.value.scholarship << ". ";
+			cout << "Телефон: " << current->data.value.phoneNumber << ". ";
+			cout << endl;
+		}
+		else {
+			cerr << "Ошибка: Указатель на объект 'current' равен nullptr." << endl;
+			continue;
+		}
+	}
+
+	temp.clear();
+	delete[] rankedIndexes;
+}
+
+
+/*
+Group temp;
+	Student* allStudents = flow.toArray();
+	int count = flow.element_count;
+	pair<int, int>* rankedIndexes = new pair<int, int>[count];
+
+	for (int i = 0; i < count; i++) {
+		int rank = 0;
+		if (normalizeName(allStudents[i].data.key) == normalizeName(inputStudent.data.key)) rank += 5;
+		if (allStudents[i].data.value.groupNumber == inputStudent.data.value.groupNumber) rank += 2;
+		if (allStudents[i].data.value.arr == inputStudent.data.value.arr) rank += 2;
+		if (allStudents[i].data.value.scholarship == inputStudent.data.value.scholarship) rank += 2;
+		if (allStudents[i].data.value.phoneNumber == inputStudent.data.value.phoneNumber) rank += 7;
+		if (rank > 1) {
+			Student rankedStudent(allStudents[i]);
+			temp.add(rankedStudent);
+			rankedIndexes[temp.common_count - 1] = make_pair(temp.common_count - 1, rank);
+		}
+	}
+	delete[] allStudents;
+
+	// simple sorting tempGroup by descending compatibility rating
+	mergeSort(rankedIndexes, 0, temp.common_count-1);
+
+	for (int m = 0; m < temp.common_count-1; m++) {
+		int index = rankedIndexes[m].first;
+		Student* current = temp.go_to(index);
+		cout << "ФИО: " << current->data.key << ". ";
+		cout << "Группа: " << current->data.value.groupNumber << ". ";
+		cout << "Оценки: ";
+		for (int j = 0; j < 5; j++) {
+			cout << current->data.value.arr[j] << " ";
+		}
+		cout << "Стипендия: " << current->data.value.scholarship << ". ";
+		cout << "Телефон: " << current->data.value.phoneNumber << ". ";
+		cout << endl;
+	}
+
+	temp.clear();
+	delete[] rankedIndexes;
+*/
+void Student_output(int count, Student* array) {
+	for (int i = 0; i < count; i++) {
+		cout << "ФИО: " << array[i].data.key << " | ";
+		cout << " Телефон: " << array[i].data.value.phoneNumber << " | ";
+		cout << " Группа: " << array[i].data.value.groupNumber << " | ";
+		cout << " Оценки: "; for (int j = 0; j < 5; j++) { cout << " " << array[i].data.value.arr[j] << " "; } cout << " | ";
+		cout << " Стипендия: " << array[i].data.value.scholarship << " рублей.\n";
+	}
+}
 
 int main() {
 	setlocale(LC_ALL, "ru");
@@ -102,6 +203,7 @@ int main() {
 	do {
 		cout << "Введите команду: ";
 		cin >> choice;
+		new_student.clear();
 
 		switch (choice) {
 		case 1: {
@@ -109,12 +211,11 @@ int main() {
 			cout << "Введите ФИО студента: ";
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');getline(cin, new_student.data.key);
 			cout << "Введите номер группы (по ней идет поиск группы студента в потоке): "; cin >> new_student.data.value.groupNumber;
-			cout << "Введите пять оценок студента: "; for (int i = 0; i < 5; i++) { cout << i << ") "; cin >> new_student.data.value.arr[i]; }
+			cout << "Введите пять оценок студента:\n"; for (int i = 0; i < 5; i++) { cout << i << ") "; cin >> new_student.data.value.arr[i]; }
 			cout << "Введите стипендию студента: "; cin >> new_student.data.value.scholarship;
 			cout << "Введите телефонный номер студента (по нему в списках идентифицируются студенты): "; cin >> new_student.data.value.phoneNumber;
 			Flow.add(new_student.data.value.groupNumber, new_student);
 			cout << "Студент успешно введен в поток.\n";
-			new_student.clear();
 			break;
 		}
 		case 2: {
@@ -146,19 +247,34 @@ int main() {
 				Flow.remove(number, group);
 				cout << "Обновленный студент успешно переведен.\n";
 			}
-			new_student.clear();
 			break;
 		}
 		case 4: {
-			cout << "Введите группу студента: ";
-			cin >> group;
-			cout << "Введите номер телефона просматриваемого студента: ";
-			cin >> number;
-			Student* student_info = Flow.arr[Flow.hashFoo(group)].look_for_node_without_access(Student(Pair(group, number)));
-			cout << "ФИО: " << student_info->data.key;
-			cout << " Оценки: "; for (int i = 0; i < 5; i++) { cout << " " << student_info->data.value.arr[i] << " "; };
-			cout << " Стипендия: " << student_info->data.value.scholarship << " рублей.\n";
-			break;
+			cout << "Если вам не известны группа и номер телефона студента, введите 1, иначе любое другое число: ";
+			cin >> choice;
+			if (choice == 1) {
+				cout << "Введите группу студента: ";
+				cin >> group;
+				cout << "Введите номер телефона просматриваемого студента: ";
+				cin >> number;
+				Student* student_info = Flow.arr[Flow.hashFoo(group)].look_for_node_without_access(Student(Pair(group, number)));
+				cout << "ФИО: " << student_info->data.key;
+				cout << " Оценки: "; for (int i = 0; i < 5; i++) { cout << " " << student_info->data.value.arr[i] << " "; };
+				cout << " Стипендия: " << student_info->data.value.scholarship << " рублей.\n";
+				break;
+			}
+			else {
+				cout << "Введите любую информацию о студенте, которой располагаете.\n";
+				new_student.clear();
+				cout << "Введите ФИО студента (в случае отсутствия, введите '-'): ";
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');getline(cin, new_student.data.key);
+				cout << "Введите номер группы (в случае отсутствия, введите '0'): "; cin >> new_student.data.value.groupNumber;
+				cout << "Введите пять оценок студента (в случае отсутствия, введите везде '0'): \n"; for (int i = 0; i < 5; i++) { cout << i << ") "; cin >> new_student.data.value.arr[i]; }
+				cout << "Введите стипендию студента (в случае отсутствия, введите '-1'): "; cin >> new_student.data.value.scholarship;
+				cout << "Введите телефонный номер студента (в случае отсутствия, введите '-'): "; cin >> new_student.data.value.phoneNumber;
+				rankAndPrintStudents(Flow, new_student);
+				break;
+			}
 		}
 		case 5: {
 			Student* array = Flow.toArray();
@@ -171,6 +287,7 @@ int main() {
 		case 7: {
 			cout << "Введите номер удаляемой группы: ";
 			cin >> group;
+			Flow.element_count -= Flow.arr[Flow.hashFoo(group)].common_count;
 			Flow.arr[Flow.hashFoo(group)].clear();
 			cout << "Группа успешно удалена.\n";
 			break;
@@ -181,7 +298,12 @@ int main() {
 			cin >> group;
 			cout << "Введите новый номер группы: ";
 			cin >> newGroup;
-			Flow.arr[Flow.hashFoo(group)].groupNumber = newGroup;
+			int oldindex = Flow.hashFoo(group), newindex = Flow.hashFoo(group);
+			Flow.arr[oldindex].groupNumber = newGroup;
+			Flow.arr[oldindex].updateGroup(newGroup);
+			if (Flow.arr[newindex].head) Flow.resize();
+			Flow.arr[oldindex] = Flow.arr[newindex];
+			Flow.arr[oldindex].clear();
 			cout << "Номер группы успешно отредактирован.\n";
 			break;
 		}
@@ -197,7 +319,7 @@ int main() {
 			Pair_for_sort* group_grades = Flow.arrayOfAverageGrades();
 			mergeSort(group_grades, 0, group_cnt - 1);
 			for (int i = 0; i < group_cnt; i++) 
-			{ cout << "Группа: " << group_grades[i].group << ", Средний балл: " << group_grades[i].grade << endl; } 
+			{ cout << "Группа: " << group_grades[i].first << ", Средний балл: " << group_grades[i].second << endl; } 
 			delete[] group_grades;
 			break;
 		}
@@ -205,7 +327,7 @@ int main() {
 			int group_cnt = Flow.get_count_of_groups();
 			Pair_for_sort* group_grades = Flow.arrayOfAverageGrades();
 			mergeSort(group_grades, 0, group_cnt - 1);
-			cout << "Группа с наибольшим баллом " << group_grades[0].group << ", ее бал составляет " << group_grades[0].grade << ".\n"; 
+			cout << "Группа с наибольшим баллом " << group_grades[0].first << ", ее бал составляет " << group_grades[0].second << ".\n"; 
 			delete[] group_grades;
 			break; 
 		}
