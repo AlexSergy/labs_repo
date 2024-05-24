@@ -2,9 +2,6 @@
 #include"Info.hpp"
 using namespace std;
 
-//template<typename K, typename V,typename = std::enable_if_t<std::is_arithmetic<V>::value>> 
-/*Ограничиваем операторы только для арифметических типов V, если для любых других типов,
-	то, в случае надобности можно доработать*/
 struct Pair {
 	string key;
 	Info value;
@@ -20,7 +17,5 @@ struct Pair {
 		return *this;
 	}
 	bool operator==(const Pair& other) const { return value.phoneNumber == other.value.phoneNumber; } // сравнивает телефоны для поиска
-	bool operator<(const Pair& other) const { return key < other.key; } // оператор < будет сравнивает ФИО по алфавитному порядку
-	// Возможно сравнение здесь и нужно
-	// если тип не поддерживает сравнение, компилятор сообщит об этом
+	bool operator<(const Pair& other) const { return key < other.key; } // оператор <  сравнивает ФИО по алфавитному порядку
 };

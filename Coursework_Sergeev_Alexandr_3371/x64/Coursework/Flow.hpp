@@ -69,7 +69,7 @@ public:
 		if (arr[index].groupNumber != "0") {
 			if (arr[index].groupNumber == student.data.value.groupNumber) {
 				if (!arr[index].look_for(student)) { arr[index].add(student); }
-				else return;
+				else throw logic_error("Ошибка: студент с таким номером телефона уже существует в группе.\nПожалуйста, проверьте правильность ввода и попробуйте еще раз добавить студента.\n");
 			}
 			else {
 				resize();
@@ -84,15 +84,19 @@ public:
 
 	void updateStudent(const Student updateStudent, const string oldGroupNumber, const string oldNumber) {
 		int index = hashFoo(oldGroupNumber);
-		Student oldStudent = Pair(oldNumber, oldGroupNumber); // для поиска
-		if (arr[index].look_for(oldStudent)) {
-			Student& update = arr[index].look_for_node(oldStudent); // уже для изменения
-			update.data.value.phoneNumber = updateStudent.data.value.phoneNumber;
-			update.data.value.groupNumber = updateStudent.data.value.groupNumber;
-			update.data.value.scholarship = updateStudent.data.value.scholarship;
-			update.data.value.arr = updateStudent.data.value.arr;
+		Student* oldStudent = arr[index].look_for_node_without_access(Student(Pair(oldNumber, oldGroupNumber)));
+		Student temp = *oldStudent;
+		if (updateStudent.data.value.groupNumber == oldGroupNumber) {
+			arr[index].remove(oldStudent);
+			if (arr[index].look_for(updateStudent)) { 
+				arr[index].add(temp);
+				throw logic_error("Ошибка: студент с таким номером телефона уже существует в группе.\nПожалуйста, проверьте правильность ввода и попробуйте еще раз добавить студента.\n");
+			}
+			else { arr[index].add(updateStudent); }
 		}
-	}
+		else { throw exception(); }
+		}
+		
 
 	void remove(const string& number, const string& group) {
 		Student student = Pair(number, group); int index = hashFoo(group);
@@ -132,7 +136,10 @@ public:
 		Student* students = new Student[arr[index].count()];
 		if (arr[index].groupNumber == group) {
 			Student* cur = arr[index].head;
-			while (cur) { students[i++] = *cur; cur = cur->next; }
+			while (cur) { 
+				students[i++] = *cur;
+				cur = cur->next; 
+			}
 			return students;
 		}
 		else { throw logic_error("Group not found or group numbers do not match."); }

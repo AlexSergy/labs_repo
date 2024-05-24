@@ -47,5 +47,4 @@ struct Info {
     bool operator==(const Info& info) const { return  (info.phoneNumber == phoneNumber); }
 
     float average_grade() const { return  static_cast<float>(arr.sum()) / 5; }
-    // Если понадобится, сделай геттеры и т.д.
 };

@@ -12,11 +12,28 @@ public:
     int common_count = 0;
     Student* prevNode = nullptr;
     int prevNum = -1;
-    //float Average_score = 0;
+
+
+    Group& operator=(const Group& other) {
+        if (this == &other) { return *this; }
+        clear();
+        groupNumber = other.groupNumber;
+        common_count = other.common_count;
+        prevNum = other.prevNum;
+        Student* current = other.head;
+        while (current != nullptr) {
+            add(*current); 
+            current = current->next;
+        }
+        prevNode = other.prevNode;
+        prevNum = other.prevNum;
+        return *this;
+    }
     
 
     Group(string gN) : groupNumber(gN), head(nullptr), tail(nullptr), common_count(0) {}
     Group() : groupNumber("0"), head(nullptr), tail(nullptr), common_count(0) {}
+    
 
     // Блок кода с дополнительными функциями
     // --------------------------------------------------------------------------------
@@ -67,35 +84,6 @@ public:
             cur = cur->next;
         }
     }
-    /*
-    Student* go_to(int num) {
-        Student* start = head;
-        int steps = num;
-        int distance_head = num;
-        int distance_tail = common_count - num - 1;
-        int distance_prev = prevNode ? abs(prevNum - num) : INT_MAX; // индекса нет => инт макс
-        // если нет prevNode, то любой другой путь быстрее, чем distance_prev
-
-        // ищем ближайшую точку и кол-во шагов до точки
-        if (distance_head <= distance_tail && distance_head <= distance_prev) {
-            start = head;
-            steps = num;
-        }
-        else if (distance_tail < distance_head && distance_tail < distance_prev) {
-            start = tail;
-            steps = distance_tail;
-        }
-        else {
-            start = prevNode;
-            steps = prevNum < num ? num - prevNum : prevNum - num;
-        }
-
-        if (prevNum > num) { while (steps-- > 0) { if (start) start = start->prev; } }
-        else { while (steps-- > 0) { if (start) start = start->next; } }
-
-        return start;
-    }
-    */
 
     void remove(Student* del) {
         Student* cur = head; int x = 0;
@@ -115,12 +103,7 @@ public:
         else { prevNum = (x < prevNum) ? --prevNum : prevNum; }
         delete cur;
         common_count--;
-        if (common_count == 0) { 
-            head = tail = prevNode = nullptr;
-            groupNumber = "0";
-            common_count = 0;
-            prevNum = -1;
-        }
+        if (common_count == 0) { zeroing(); }
     }
 
     // Основные функции по List
@@ -189,6 +172,13 @@ public:
 
     int count() const { return common_count; }
 
+    void zeroing() {
+        head = nullptr; tail = nullptr; prevNode = nullptr;
+        groupNumber = "0";
+        common_count = 0;
+        prevNum = -1;
+    }
+
     void clear() {
         Student* cur = head;
         while (cur) {
@@ -197,10 +187,7 @@ public:
             delete cur;
             cur = next;
         }
-        head = nullptr; tail = nullptr; prevNode = nullptr;
-        groupNumber = "0";
-        common_count = 0;
-        prevNum = -1;
+        zeroing();
     }
 
     // ---------------------------------------------------------------------------------------
