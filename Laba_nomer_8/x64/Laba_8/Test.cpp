@@ -1,118 +1,151 @@
 #include <gtest/gtest.h>
 #include "Tree.hpp"
 #include <algorithm>
+#include<numeric>
 
-TEST(TreeTest, RotateNonExistentNode) {
-    Tree tree;
-    // Добавляем элементы в дерево.
-    tree.add(10);
-    tree.add(5);
-    tree.add(20);
-
-    // Попытка повернуть несуществующий узел.
-    tree.ToLeft(15);
-    auto root = tree.root;
-    ASSERT_TRUE(root != nullptr) << "Root should not be nullptr after rotation attempt on non-existent node.";
-    ASSERT_EQ(root->value, 10) << "Root should have value 10.";
-
-    tree.ToRight(15);
-    root = tree.root;
-    ASSERT_TRUE(root != nullptr) << "Root should not be nullptr after rotation attempt on non-existent node.";
-    ASSERT_EQ(root->value, 10) << "Root should have value 10.";
+TEST(TreeTest, ClearEmptyTree) {
+    Tree t;
+    t.clear();
+    EXPECT_EQ(t.root, nullptr);
+    EXPECT_EQ(t.size, 0);
 }
 
-TEST(TreeTest, RotateRootNode) {
-    Tree tree;
-    // Добавляем элементы в дерево.
-    tree.add(10);
-    tree.add(5);
-    tree.add(20);
-
-    // Поворот корневого узла.
-    tree.ToLeft(10);
-    Node* root = tree.root;
-    ASSERT_TRUE(root != nullptr) << "Root should not be nullptr after left rotation.";
-    ASSERT_EQ(root->value, 20) << "New root should have value 5 after left rotation.";
-
-    tree.ToRight(5);
-    root = tree.root;
-    ASSERT_TRUE(root != nullptr) << "Root should not be nullptr after right rotation.";
-    ASSERT_EQ(root->value, 20) << "Root should be value 10 after right rotation.";
+TEST(TreeTest, ClearSingleNodeTree) {
+    Tree t;
+    t.add(42);
+    t.clear();
+    EXPECT_EQ(t.root, nullptr);
+    EXPECT_EQ(t.size, 0);
 }
 
-TEST(TreeTest, RotateLeafNode) {
-    Tree tree;
-    // Добавляем элементы в дерево.
-    tree.add(10);
-    tree.add(5);
-    tree.add(20);
-    tree.add(1);
+TEST(TreeTest, ClearComplexTree) {
+    Tree t;
+    vector<int> values = { 50, 30, 20, 40, 70, 60, 80 };
+    for (int value : values) {
+        t.add(value);
+    }
 
-    // Поворот листового узла.
-    tree.ToLeft(1);
-    // Проверки структуры дерева после поворота.
-    ASSERT_TRUE(tree.root->l != nullptr) << "Root should have left child.";
-    ASSERT_EQ(tree.root->l->value, 5) << "Left child of root should have value 5.";
-
-    tree.ToRight(1);
-    // Проверки структуры дерева после поворота.
-    ASSERT_TRUE(tree.root->l != nullptr) << "Root should have left child after right rotation.";
+    t.clear();
+    EXPECT_EQ(t.root, nullptr);
+    EXPECT_EQ(t.size, 0);
 }
 
-TEST(TreeRotationTest, RotateLeftSimpleCase) {
-    Tree tree;
-    tree.add(10);
-    tree.add(5);
-    tree.add(15);
-    tree.add(20);
+TEST(TreeTest, ClearAndReuse) {
+    Tree t;
+    vector<int> values1 = { 50, 30, 20, 40, 70, 60, 80 };
+    for (int value : values1) {
+        t.add(value);
+    }
 
-    tree.ToLeft(10); // Должен провести левый поворот вокруг узла со значением 10.
+    t.clear();
 
-    // После поворота узел со значением 15 должен стать корнем.
-    ASSERT_EQ(tree.root->value, 15);
+    vector<int> values2 = { 25, 75, 10, 35, 65, 90 };
+    for (int value : values2) {
+        t.add(value);
+    }
 
-    // Узел со значением 10 теперь должен быть левым ребенком корня.
-    ASSERT_EQ(tree.root->l->value, 10);
+    int* arr = t.ToArray();
+    vector<int> expected = { 10, 25, 35, 65, 75, 90 };
+    for (int i = 0; i < t.size; i++) {
+        EXPECT_EQ(arr[i], expected[i]);
+    }
+    delete[] arr;
+}
+TEST(TreeTest, ClearAfterRotations) {
+    Tree t;
+    vector<int> values = { 50, 30, 70, 20, 40, 60, 80 };
+    for (int value : values) {
+        t.add(value);
+    }
 
-    // Убедимся, что правильно обновлены родительские указатели.
-    ASSERT_EQ(tree.root->l->p->value, 15);
+    // Выполняем некоторые повороты
+    t.ToLeft(30);
+    t.ToRight(70);
+    t.ToLeft(40);
 
-    // Проверяем обновление узла со значением 20.
-    ASSERT_EQ(tree.root->r->value, 20);
-    ASSERT_EQ(tree.root->r->p->value, 15);
-
-    // Убедимся, что оставшиеся связи все еще корректны.
-    ASSERT_EQ(tree.root->l->l->value, 5);
-    ASSERT_EQ(tree.root->l->l->p->value, 10);
+    t.clear();
+    EXPECT_EQ(t.root, nullptr);
+    EXPECT_EQ(t.size, 0);
 }
 
-TEST(TreeRotationTest, RotateRightSimpleCase) {
-    Tree tree;
-    tree.add(10);
-    tree.add(5);
-    tree.add(15);
-    tree.add(3);
+TEST(TreeTest, ClearAfterBalancing) {
+    Tree t;
+    vector<int> values = { 50, 25, 75, 10, 30, 60, 90, 5, 15, 28, 35, 55, 65, 85, 95 };
+    for (int value : values) {
+        t.add(value);
+    }
 
-    tree.ToRight(10); // Должен провести правый поворот вокруг узла со значением 10.
+    // Балансируем дерево
+    t.Balance();
 
-    // После поворота узел со значением 5 должен стать корнем.
-    ASSERT_EQ(tree.root->value, 5);
-
-    // Узел со значением 10 теперь должен быть правым ребенком корня.
-    ASSERT_EQ(tree.root->r->value, 10);
-
-    // Убедимся, что правильно обновлены родительские указатели.
-    ASSERT_EQ(tree.root->r->p->value, 5);
-
-    // Проверяем обновление узла со значением 3.
-    ASSERT_EQ(tree.root->l->value, 3);
-    ASSERT_EQ(tree.root->l->p->value, 5);
-
-    // Убедимся, что связи для узла со значением 15 все еще корректны.
-    ASSERT_EQ(tree.root->r->r->value, 15);
-    ASSERT_EQ(tree.root->r->r->p->value, 10);
+    t.clear();
+    EXPECT_EQ(t.root, nullptr);
+    EXPECT_EQ(t.size, 0);
 }
 
+TEST(TreeTest, ClearWithDuplicates) {
+    Tree t;
+    vector<int> values = { 50, 30, 70, 20, 40, 60, 80, 30, 40, 60 };
+    for (int value : values) {
+        t.add(value);
+    }
+
+    t.clear();
+    EXPECT_EQ(t.root, nullptr);
+    EXPECT_EQ(t.size, 0);
+}
+
+TEST(TreeTest, ClearWithRecursiveStructure) {
+    Tree t;
+    vector<int> values = { 50, 30, 70, 20, 40, 60, 80, 15, 25, 35, 45, 55, 65, 75, 85 };
+    for (int value : values) {
+        t.add(value);
+    }
+
+    // Создаем рекурсивную структуру внутри дерева
+    t.ToLeft(20);
+    t.ToRight(40);
+    t.ToLeft(60);
+    t.ToRight(80);
+
+    t.clear();
+    EXPECT_EQ(t.root, nullptr);
+    EXPECT_EQ(t.size, 0);
+}
+
+TEST(TreeTest, ClearWithLargeTree) {
+    Tree t;
+    vector<int> values(10000);
+    iota(values.begin(), values.end(), 0); // Заполняем вектор значениями от 0 до 99999
+    random_shuffle(values.begin(), values.end()); // Перемешиваем значения
+
+    for (int value : values) {
+        t.add(value);
+    }
+
+    t.clear();
+    EXPECT_EQ(t.root, nullptr);
+    EXPECT_EQ(t.size, 0);
+}
+
+TEST(TreeTest, ClearWithMultipleOperations) {
+    Tree t;
+    vector<int> values = { 50, 30, 70, 20, 40, 60, 80, 10, 25, 35, 45, 55, 65, 75, 85 };
+    for (int value : values) {
+        t.add(value);
+    }
+
+    // Выполняем несколько операций над деревом
+    t.ToLeft(30);
+    t.ToRight(70);
+    t.remove(50);
+    t.add(90);
+    t.Balance();
+
+    t.clear();
+    EXPECT_EQ(t.root, nullptr);
+    EXPECT_EQ(t.size, 0);
+}
 
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);

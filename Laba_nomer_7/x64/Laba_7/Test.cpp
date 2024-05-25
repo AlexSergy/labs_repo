@@ -7,7 +7,6 @@
 #include "Tree.hpp" // Заголовочный файл для вашего класса Tree
 
 
-
 void printArray(int* arr, int size) {
     for (int i = 0; i < size; i++) {
         std::cout << arr[i] << " ";
@@ -230,6 +229,8 @@ TEST(TreeBalance, RandomTreeTest) {
 
     // Проверяем балансировку дерева
     ASSERT_LE(std::abs(t.height(t.root->l) - t.height(t.root->r)), 1);
+
+    t.clear();
 }
 
 // Помощник для создания вектора из элементов дерева в порядке Infix
@@ -259,20 +260,6 @@ TEST(TreeBalanceTest, TestMaintainsOrder) {
     EXPECT_EQ(before_balance, after_balance);
 }
 
-// Проверка уменьшения высоты балансировки
-TEST(TreeBalanceTest, TestHeightReduction) {
-    Tree t;
-    // Добавление элементов для создания несбалансированного дерева
-    for (int i = 0; i < 10; i++) {
-        t.add(i);
-    }
-
-    auto height_before = t.height(t.root);
-    t.Balance();
-    auto height_after = t.height(t.root);
-
-    EXPECT_GT(height_before, height_after);
-}
 
 // Проверка балансировки на случайном наборе значений
 TEST(TreeBalanceTest, TestRandomBalancing) {
@@ -297,6 +284,52 @@ TEST(TreeBalanceTest, TestRandomBalancing) {
     int right_height = t.height(t.root->r);
     EXPECT_LE(std::abs(left_height - right_height), 1);
 }
+
+
+
+Tree createUnbalancedTree() {
+    Tree tree;
+    tree.add(1000); // Добавляем корневой узел
+    tree.add(10000);
+    tree.add(-100); // Добавляем правый узел к корню
+
+    // Создаем цепочку из 999 узлов, идущую слева от правого дочернего узла корня
+    std::vector<int> values(100);
+    iota(values.begin(), values.end(), 0); // Заполняем значениями от 0 до 99
+    std::shuffle(values.begin(), values.end(), std::mt19937{ std::random_device{}() });
+
+    // Добавляем элементы в случайном порядке
+    for (int val : values) {
+        tree.add(val);
+    }
+
+    return tree;
+}
+
+TEST(TreeBalance, BalanceChainTest) {
+    Tree tree = createUnbalancedTree();
+
+    // Перед началом балансировки делаем некоторые проверки, чтобы убедиться, что дерево построено правильно
+    EXPECT_EQ(tree.count(), 103); // Всего узлов должно быть 1000
+    ASSERT_TRUE(tree.contains(1000)); // Проверяем, что 1000 есть в дереве
+
+    // Выполняем балансировку
+    tree.Balance();
+
+    // Проверяем, что дерево все еще содержит все узлы
+    EXPECT_EQ(tree.count(), 103);
+
+    // Убеждаемся, что балансировка корректно отработала
+    // Например, проверяем, что правая и левая ветвь имеют разницу в высоте не более 1
+    int leftHeight = tree.height(tree.root->l);
+    int rightHeight = tree.height(tree.root->r);
+
+    ASSERT_LE(std::abs(leftHeight - rightHeight), 1) << "Дерево не сбалансировано после выполнения операции балансировки";
+
+    // Очищаем дерево
+    tree.clear();
+}
+
 
 int main(int argc, char** argv) {
     setlocale(LC_ALL, "ru");

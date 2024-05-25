@@ -5,9 +5,9 @@ using namespace std;
 
 
 struct Node {
-	int value;
-	Node* l, * r, * p;
-	Node(int x, Node* p = nullptr) : value(x), l(nullptr), r(nullptr), p(p) {}
+	int value, h = 1;
+	Node* l = nullptr, * r = nullptr, * p = nullptr;
+	Node(int x, Node* p = nullptr) : value(x), l(nullptr), r(nullptr), p(p), h(1) {}
 };
 
 struct Tree {
@@ -26,7 +26,7 @@ public:
 		return *cur;
 	}
 
-	Node* minNode(Node*& node) {
+	Node* minNode(Node* node) {
 		while (node->l) node = node->l;
 		return node;
 	}
@@ -119,31 +119,71 @@ public:
 
 	Node* findAndRotate(Node*& n, int v, bool left) {
 		if (!n) return nullptr;
-		if (n && n->value == v) return rotate(n, left), n;
-		if (v < n->value) return findAndRotate(n->l, v, left);
-		else return findAndRotate(n->r, v, left);
-	}
-
-	int height(Node* n) {
-		if (!n) return 0;
-		return  1 + max(height(n->l), height(n->r));
-	}
-	int outermost_height(Node* n, bool left) { return n != nullptr ? left ? 1 + outermost_height(n->l, left) : 1 + outermost_height(n->r, left) : 0; }
-
-
-
-	Node* balance(Node*& n) {
-		if (!n) return nullptr;
-		int l = outermost_height(n, true);
-		int r = outermost_height(n, false);
-		while (abs(l - r) > 1) {
-			rotate(n, r > l);
-			l = outermost_height(n->l, true);
-			r = outermost_height(n->r, false);
+		if (n->value == v) {
+			if (left) { leftRotate(n); }
+			else { rightRotate(n); }
+			return n; 
 		}
-		n->l = balance(n->l);
-		n->r = balance(n->r);
+		if (v < n->value) { n->l = findAndRotate(n->l, v, left); }
+		else { n->r = findAndRotate(n->r, v, left); }
 		return n;
+	}
+
+	int height(Node* n) { return n ? max(n->l ? n->l->h : 0, n->r ? n->r->h : 0) + 1 : 0; }
+	int getBalanceFactor(Node* n) { return (n->l ? n->l->h : 0) - (n->r ? n->r->h : 0); }
+
+	void leftRotate(Node*& n) {
+		Node* r = n->r;
+		if (!r) return;
+		n->r = r->l;
+		if (r->l) r->l->p = n;
+		r->p = n->p;
+		r->l = n;
+		n->p = r;
+		n->h = height(n);
+		r->h = height(r);
+		if (!r->p) root = r;
+		else if (r->p->l == n) r->p->l = r;
+		else r->p->r = r;
+		n = r;
+	}
+
+	void rightRotate(Node*& n) {
+		Node* l = n->l;
+		if (!l) return;
+		n->l = l->r;
+		if (l->r) l->r->p = n;
+		l->p = n->p;
+		l->r = n;
+		n->p = l;
+		n->h = height(n);
+		l->h = height(l);
+		if (!l->p) root = l;
+		else if (l->p->l == n) l->p->l = l;
+		else l->p->r = l;
+		n = l;
+	}
+
+	void balance(Node*& n) {
+		if (!n) return;
+		n->h = height(n);
+		int bf = getBalanceFactor(n);
+		if (bf > 1) {
+			if (getBalanceFactor(n->l) >= 0) rightRotate(n);
+			else {
+				leftRotate(n->l);
+				rightRotate(n);
+			}
+		}
+		else if (bf < -1) {
+			if (getBalanceFactor(n->r) <= 0) leftRotate(n);
+			else {
+				rightRotate(n->r);
+				leftRotate(n);
+			}
+		}
+		balance(n->l);
+		balance(n->r);
 	}
 
 	// ÍÎÂÛÅ È ÈÇÌÅÍÅÍÍÛÅ ÔÓÍÊÖÈÈ ÄËß ÂÎÑÜÌÎÉ ËÀÁÛ (ïîìå÷åíû *)
@@ -205,6 +245,7 @@ public:
 			}
 			else { root = node; }
 			size++;
+			balance(node);
 		}
 	}
 
@@ -212,6 +253,7 @@ public:
 		Node* parent = nullptr;
 		Node*& node = findNode(v, parent);
 		if (node) { delNode(node, parent); }
+		balance(node);
 	}
 
 	void clear() {
@@ -229,7 +271,7 @@ public:
 
 	void ToLeft(int v) { findAndRotate(root, v, true); }
 	void ToRight(int v) { findAndRotate(root, v, false); }
-	void Balance() { root = balance(root); }
+	void Balance() { if (root) { while (abs(height(root->l) - height(root->r)) > 1) { balance(root); } } }
 	int* ToArray(Order o) { return To_Array(o); }
 	int* ToArray() { return To_Array(Infix); }
 };

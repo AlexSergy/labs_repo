@@ -50,6 +50,7 @@ public:
 					result[idx++] = arr[i].element(j);
 			}
 		}
+		else { return nullptr; }
 		return result;
 	}
 };
