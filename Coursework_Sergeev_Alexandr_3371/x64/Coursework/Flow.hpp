@@ -78,24 +78,34 @@ public:
 			}
 		}
 		else { arr[index].add(student); }
-		if (static_cast<float>(get_count_of_groups()) / size >= load_factor) {resize();} // This one's a little tricky, but I left it like this.
+		if (static_cast<float>(get_count_of_groups()) / size >= load_factor) { resize(); } // This one's a little tricky, but I left it like this.
 		element_count++;
 	}
 
 	void updateStudent(const Student updateStudent, const string oldGroupNumber, const string oldNumber) {
 		int index = hashFoo(oldGroupNumber);
-		Student* oldStudent = arr[index].look_for_node_without_access(Student(Pair(oldNumber, oldGroupNumber)));
+		Student* oldStudent = nullptr;
+		try { oldStudent = arr[index].look_for_node_without_access(Student(Pair(oldNumber, oldGroupNumber)));  }
+		catch (exception()) { "Студент не найден.\n"; }
 		Student temp = *oldStudent;
 		if (updateStudent.data.value.groupNumber == oldGroupNumber) {
 			arr[index].remove(oldStudent);
-			if (arr[index].look_for(updateStudent)) { 
+			if (arr[index].look_for(updateStudent)) {
 				arr[index].add(temp);
-				throw logic_error("Ошибка: студент с таким номером телефона уже существует в группе.\nПожалуйста, проверьте правильность ввода и попробуйте еще раз добавить студента.\n");
+				throw exception("Ошибка: студент с таким номером телефона уже существует в группе.\nПожалуйста, проверьте правильность ввода и попробуйте еще раз добавить студента.\n");
 			}
 			else { arr[index].add(updateStudent); }
 		}
-		else { throw exception(); }
+		else { 
+			arr[index].remove(oldStudent);
+			int new_id = hashFoo(updateStudent.data.value.groupNumber);
+			if (arr[new_id].look_for(updateStudent)) { 
+				arr[index].add(temp);
+				throw exception("Ошибка: студент с таким номером телефона уже существует в новой группе.\nПожалуйста, проверьте правильность ввода и попробуйте еще раз.\n");
+			}
+			else { arr[new_id].add(updateStudent); }
 		}
+	}
 		
 
 	void remove(const string& number, const string& group) {
@@ -146,14 +156,15 @@ public:
 	}
 
 	Pair_for_sort* arrayOfAverageGrades() {
-		int j = 0;
-		Pair_for_sort* av_grades = new Pair_for_sort[get_count_of_groups()];
+		int j = 0, cnt = get_count_of_groups();
+		Pair_for_sort* av_grades = new Pair_for_sort[cnt];
 		for (int i = 0; i < size; i++) {
 			if (arr[i].count() > 0) {
 				av_grades[j].first = arr[i].groupNumber;
 				av_grades[j++].second = arr[i].updateAverageScore();
 			}
 		}
+		if (cnt == 0) return nullptr;
 		return av_grades;
 	}
 

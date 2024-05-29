@@ -239,7 +239,7 @@ public:
             if (cur->data == value.data) { return *cur; }
             cur = cur->next;
         }
-        throw out_of_range("Node not found");
+        throw exception();
     }
 
 
@@ -249,7 +249,7 @@ public:
             if (cur->data == value.data) { return cur; }
             cur = cur->next;
         }
-        throw out_of_range("Node not found");
+        throw exception();
     }
 
     float updateAverageScore() {
