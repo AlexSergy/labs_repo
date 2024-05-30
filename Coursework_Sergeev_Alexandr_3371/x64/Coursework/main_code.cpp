@@ -31,8 +31,8 @@ void printMenu() {
 	cout << "--------------------------------------------------------------------\n";
 }
 
-template <typename G>
-void merge(G* arr, int left, int middle, int right) {
+template <typename G, typename Compare>
+void merge(G* arr, int left, int middle, int right, Compare comp) {
 	int n1 = middle - left + 1;
 	int n2 = right - middle;
 
@@ -46,7 +46,7 @@ void merge(G* arr, int left, int middle, int right) {
 	// Сливаем временные массивы обратно
 	int i = 0, j = 0, k = left;
 	while (i < n1 && j < n2) {
-		if (L[i].second >= R[j].second) {
+		if (comp(L[i], R[j])) {
 			arr[k] = L[i];
 			i++;
 		}
@@ -73,13 +73,13 @@ void merge(G* arr, int left, int middle, int right) {
 	delete[] R;
 }
 
-template <typename G>
-void mergeSort(G* arr, int left, int right) {
+template <typename G, typename Compare>
+void mergeSort(G* arr, int left, int right, Compare comp) {
 	if (left < right) {
 		int middle = left + (right - left) / 2;
-		mergeSort(arr, left, middle);
-		mergeSort(arr, middle + 1, right);
-		merge(arr, left, middle, right);
+		mergeSort(arr, left, middle, comp);
+		mergeSort(arr, middle + 1, right, comp);
+		merge(arr, left, middle, right, comp);
 	}
 }
 
@@ -112,7 +112,7 @@ void rankAndPrintStudents(Flow& flow, const Student& inputStudent) {
 	delete[] allStudents;
 
 	// simple sorting tempGroup by descending compatibility rating
-	mergeSort(rankedIndexes, 0, temp.common_count - 1);
+	mergeSort(rankedIndexes, 0, temp.common_count - 1, [](const pair<int, int>& a, const pair<int, int>& b) { return a.second > b.second; });
 	if (!temp.head) { cout << "Студенты, подходящие под входные данные не найдены.\n"; return; }
 
 	cout << "\nВсе студенты, подходящие под входные данные в ранжированном порядке\n";
@@ -294,7 +294,7 @@ int main() {
 		case 10: { 
 			int group_cnt = Flow.get_count_of_groups();
 			Pair_for_sort* group_grades = Flow.arrayOfAverageGrades();
-			mergeSort(group_grades, 0, group_cnt - 1);
+			mergeSort(group_grades, 0, group_cnt - 1, [](const Pair_for_sort& a, const Pair_for_sort& b) { return a.second > b.second; });
 			for (int i = 0; i < group_cnt; i++) 
 			{ cout << "Группа: " << group_grades[i].first << ", Средний балл: " << group_grades[i].second << endl; } 
 			delete[] group_grades;
@@ -304,8 +304,17 @@ int main() {
 			int group_cnt = Flow.get_count_of_groups();
 			Pair_for_sort* group_grades = Flow.arrayOfAverageGrades();
 			if (group_grades) {
-				mergeSort(group_grades, 0, group_cnt - 1);
+				mergeSort(group_grades, 0, group_cnt - 1, [](const Pair_for_sort& a, const Pair_for_sort& b) {return a.second > b.second;});
 				cout << "Группа с наибольшим баллом " << group_grades[0].first << ", ее бал составляет " << group_grades[0].second << ".\n";
+				cout << "Студенты группы:\n";
+				Student* array = Flow.toArray(group_grades[0].first);
+				int stud_cnt = Flow.arr[Flow.hashFoo(group_grades[0].first)].count();
+				Pair* tempArr = new Pair[stud_cnt];
+				for (int i = 0; i < stud_cnt; i++) { tempArr[i] = array[i].data; }
+				mergeSort(tempArr, 0, stud_cnt - 1, [](const Pair& a, const Pair& b) {return a.key < b.key;});
+				for (int i = 0; i < stud_cnt; i++) { array[i].data = tempArr[i]; }
+				Student_output(Flow.arr[Flow.hashFoo(group_grades[0].first)].common_count, array);
+				delete[] tempArr;
 			}
 			else { cout << "Группы на найдены.\n"; }
 			delete[] group_grades;

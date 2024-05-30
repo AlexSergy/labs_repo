@@ -1,0 +1,2 @@
+Name: Jane Smith | Phone: +9876543210 | Group: 2 | Grades: 4 5 4 3 5 | Scholarship: 1200 rubles.
+Name: John Doe | Phone: +1234567890 | Group: 1 | Grades: 5 4 3 4 5 | Scholarship: 1000 rubles.

@@ -85,7 +85,7 @@ public:
 	void updateStudent(const Student updateStudent, const string oldGroupNumber, const string oldNumber) {
 		int index = hashFoo(oldGroupNumber);
 		Student* oldStudent = nullptr;
-		try { oldStudent = arr[index].look_for_node_without_access(Student(Pair(oldNumber, oldGroupNumber)));  }
+		try { oldStudent = arr[index].look_for_node_without_access(Student(Pair(oldGroupNumber, oldNumber)));  }
 		catch (exception()) { "Студент не найден.\n"; }
 		Student temp = *oldStudent;
 		if (updateStudent.data.value.groupNumber == oldGroupNumber) {
@@ -109,7 +109,7 @@ public:
 		
 
 	void remove(const string& number, const string& group) {
-		Student student = Pair(number, group); int index = hashFoo(group);
+		Student student = Pair(group, number); int index = hashFoo(group);
 		if (arr[index].look_for(student)) {
 			arr[index].del_element(student);
 			element_count--;
