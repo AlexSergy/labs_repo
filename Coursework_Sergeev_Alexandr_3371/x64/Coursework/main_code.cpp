@@ -95,7 +95,6 @@ void rankAndPrintStudents(Flow& flow, const Student& inputStudent) {
 	Student* allStudents = flow.toArray();
 	int count = flow.element_count;
 	pair<int, int>* rankedIndexes = new pair<int, int>[count];
-	int t = 0;
 
 	for (int i = 0; i < count; i++) {
 		int rank = 0;
@@ -108,7 +107,6 @@ void rankAndPrintStudents(Flow& flow, const Student& inputStudent) {
 			Student rankedStudent(allStudents[i]);
 			temp.add(rankedStudent);
 			rankedIndexes[temp.common_count - 1] = make_pair(temp.common_count - 1, rank);
-			t++;
 		}
 	}
 	delete[] allStudents;
@@ -116,7 +114,6 @@ void rankAndPrintStudents(Flow& flow, const Student& inputStudent) {
 	// simple sorting tempGroup by descending compatibility rating
 	mergeSort(rankedIndexes, 0, temp.common_count - 1, [](const pair<int, int>& a, const pair<int, int>& b) { return a.second >= b.second; });
 	if (!temp.head) { cout << "Студенты, подходящие под входные данные не найдены.\n"; return; }
-	for (int i = 0; i < t; i++) { cout << rankedIndexes[i].first << " " << rankedIndexes[i].second; }
 
 	cout << "\nВсе студенты, подходящие под входные данные в ранжированном порядке\n";
 	for (int m = 0; m < temp.common_count; m++) {
@@ -204,9 +201,9 @@ int main() {
 			cout << "Введите обновленные оценки студента:\n"; for (int i = 0; i < 5; i++) { cout << i+1 << ") "; cin >> new_student.data.value.arr[i]; }
 			cout << "Введите обновленную стипендию студента: "; cin >> new_student.data.value.scholarship;
 			cout << "Введите обновленный телефонный номер студента (по нему в списках идентифицируются студенты): "; cin >> new_student.data.value.phoneNumber;
-			new_student.data.key = Flow.arr[Flow.hashFoo(group)].look_for_node_without_access(Student(Pair(group, number)))->data.key;
-			try { Flow.updateStudent(new_student, group, number); }
-			catch (const exception) { Flow.add(new_student.data.value.groupNumber, new_student); }
+			try { new_student.data.key = Flow.arr[Flow.hashFoo(group)].look_for_node_without_access(Student(Pair(group, number)))->data.key;}
+			catch (const runtime_error& e) { cout << e.what() << endl; break; }
+			Flow.updateStudent(new_student, group, number);
 			break;
 		}
 		case 4: {
@@ -219,7 +216,7 @@ int main() {
 				cin >> number;
 				Student* student_info = nullptr;
 				try { student_info = Flow.arr[Flow.hashFoo(group)].look_for_node_without_access(Student(Pair(group, number))); }
-				catch (const exception) { cout << "Студент не найден.\n"; }
+				catch (const runtime_error& e) { cout << e.what() << endl; }
 				if (student_info) {
 					cout << "ФИО: " << student_info->data.key;
 					cout << " Оценки: "; for (int i = 0; i < 5; i++) { cout << " " << student_info->data.value.arr[i] << " "; };
@@ -354,7 +351,7 @@ int main() {
 		}
 		case 13: {
 			ofstream outFile("students_data.txt");
-			if (!outFile.is_open()) { cerr << "Не удалось открыть файл\n"; break; }
+			if (!outFile.is_open()) { cerr << "Не удалось открыть/создать файл\n"; break; }
 			Student* array = Flow.toArray();
 			for (int i = 0; i < Flow.element_count; i++) {
 				outFile << "ФИО: " << array[i].data.key << " | ";
@@ -362,14 +359,15 @@ int main() {
 				outFile << "Группа: " << array[i].data.value.groupNumber << " | ";
 				outFile << "Оценки: ";
 				for (int j = 0; j < 5; j++) { outFile << array[i].data.value.arr[j] << " "; }
-				outFile << "| Стипендия: " << array[i].data.value.scholarship << " рублей.n";
-				outFile.close();
-				delete[] array;
+				outFile << "| Стипендия: " << array[i].data.value.scholarship << " рублей.\n";
 			}
+			outFile.close();
+			delete[] array;
+			cout << "Студенты сохранены в файл.\n";
 			break;
 		}
 		}
 		
-	} while (choice != 13);
+	} while (choice != 14);
 	return 0;
 }

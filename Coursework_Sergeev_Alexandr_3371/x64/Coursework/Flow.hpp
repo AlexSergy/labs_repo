@@ -82,29 +82,20 @@ public:
 		element_count++;
 	}
 
-	void updateStudent(const Student updateStudent, const string oldGroupNumber, const string oldNumber) {
+	void updateStudent(const Student& updateStudent, const string oldGroupNumber, const string oldNumber) {
 		int index = hashFoo(oldGroupNumber);
 		Student* oldStudent = nullptr;
 		try { oldStudent = arr[index].look_for_node_without_access(Student(Pair(oldGroupNumber, oldNumber)));  }
-		catch (exception()) { "Студент не найден.\n"; }
+		catch (const  runtime_error& a) { throw runtime_error("Студент не найден.\n"); }
 		Student temp = *oldStudent;
-		if (updateStudent.data.value.groupNumber == oldGroupNumber) {
-			arr[index].remove(oldStudent);
-			if (arr[index].look_for(updateStudent)) {
-				arr[index].add(temp);
-				throw exception("Ошибка: студент с таким номером телефона уже существует в группе.\nПожалуйста, проверьте правильность ввода и попробуйте еще раз добавить студента.\n");
-			}
-			else { arr[index].add(updateStudent); }
+		temp.prev = temp.next = nullptr;
+		arr[index].remove(oldStudent);
+		if (updateStudent.data.value.groupNumber != oldGroupNumber) { index = hashFoo(updateStudent.data.value.groupNumber); }
+		if (arr[index].look_for(updateStudent)) {
+			arr[index].add(temp);
+			throw exception("Ошибка: студент с таким номером телефона уже существует в новой группе.\nПожалуйста, проверьте правильность ввода и попробуйте еще раз.\n");
 		}
-		else { 
-			arr[index].remove(oldStudent);
-			int new_id = hashFoo(updateStudent.data.value.groupNumber);
-			if (arr[new_id].look_for(updateStudent)) { 
-				arr[index].add(temp);
-				throw exception("Ошибка: студент с таким номером телефона уже существует в новой группе.\nПожалуйста, проверьте правильность ввода и попробуйте еще раз.\n");
-			}
-			else { arr[new_id].add(updateStudent); }
-		}
+		else { arr[index].add(updateStudent); }
 	}
 		
 

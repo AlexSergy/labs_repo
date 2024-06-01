@@ -92,6 +92,7 @@ public:
             x++;
         }
         if (!cur) return;
+        if (cur == tail) { tail = cur->prev; }
         if (cur->next) cur->next->prev = cur->prev;
         if (cur->prev) cur->prev->next = cur->next;
         head = cur == head ? head->next : head;
@@ -101,6 +102,7 @@ public:
             prevNum = (prevNode == cur->next) ? x : --x;
         }
         else { prevNum = (x < prevNum) ? --prevNum : prevNum; }
+        cur->next = cur->prev = nullptr;
         delete cur;
         common_count--;
         if (common_count == 0) { zeroing(); }
@@ -249,7 +251,7 @@ public:
             if (cur->data == value.data) { return cur; }
             cur = cur->next;
         }
-        throw exception();
+        throw runtime_error("Student not found");
     }
 
     float updateAverageScore() {
