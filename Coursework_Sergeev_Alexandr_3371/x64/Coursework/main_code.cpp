@@ -203,7 +203,8 @@ int main() {
 			cout << "¬ведите обновленный телефонный номер студента (по нему в списках идентифицируютс€ студенты): "; cin >> new_student.data.value.phoneNumber;
 			try { new_student.data.key = Flow.arr[Flow.hashFoo(group)].look_for_node_without_access(Student(Pair(group, number)))->data.key;}
 			catch (const runtime_error& e) { cout << e.what() << endl; break; }
-			Flow.updateStudent(new_student, group, number);
+			try { Flow.updateStudent(new_student, group, number); }
+			catch (exception& e) { cout << e.what() << endl; }
 			break;
 		}
 		case 4: {
