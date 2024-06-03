@@ -169,7 +169,8 @@ int main() {
 		case 1: {
 			// Консольный ввод данных о студентах
 			cout << "Введите ФИО студента: ";
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');getline(cin, new_student.data.key);
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			getline(cin, new_student.data.key);
 			cout << "Введите номер группы (по ней идет поиск группы студента в потоке): "; cin >> new_student.data.value.groupNumber;
 			cout << "Введите пять оценок студента:\n"; for (int i = 0; i < 5; i++) { cout << i+1 << ") "; cin >> new_student.data.value.arr[i]; }
 			cout << "Введите стипендию студента: "; cin >> new_student.data.value.scholarship;
@@ -203,8 +204,10 @@ int main() {
 			cout << "Введите обновленный телефонный номер студента (по нему в списках идентифицируются студенты): "; cin >> new_student.data.value.phoneNumber;
 			try { new_student.data.key = Flow.arr[Flow.hashFoo(group)].look_for_node_without_access(Student(Pair(group, number)))->data.key;}
 			catch (const runtime_error& e) { cout << e.what() << endl; break; }
+			// измененная часть кода
 			try { Flow.updateStudent(new_student, group, number); }
 			catch (exception& e) { cout << e.what() << endl; }
+			//
 			break;
 		}
 		case 4: {
@@ -344,7 +347,8 @@ int main() {
 					getline(iss, token, ':');
 					iss >> new_student.data.value.scholarship;
 					getline(iss, token);
-					Flow.add(new_student.data.value.groupNumber, new_student);
+					try { Flow.add(new_student.data.value.groupNumber, new_student); }
+					catch (logic_error& e) { cout << e.what() << endl; }
 				}
 				inFile.close();
 			}

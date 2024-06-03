@@ -213,11 +213,7 @@ public:
                 }
                 delete del;
                 common_count--;
-                if (!common_count) { 
-                    head = tail = prevNode = nullptr;
-                    groupNumber = "0";
-                    common_count = 0;
-                    prevNum = -1;
+                if (!common_count) { zeroing();
                 }
                 break;
             }
@@ -243,7 +239,6 @@ public:
         }
         throw exception();
     }
-
 
     Student* look_for_node_without_access(const Student& value) {
         Student* cur = head;

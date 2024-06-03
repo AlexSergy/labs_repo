@@ -14,9 +14,9 @@ struct Array {
     int& operator[](size_t index) { return data[index]; }
     const int& operator[](size_t index) const { return data[index]; }
     bool operator==(const Array& arr) {
-        bool flag = true;
-        for (int i = 0; i < N; i++) { if (data[i] != arr[i]) { flag = false; } }
-        return flag;
+        return data == arr.data;
+        for (int i = 0; i < N; i++) { if (data[i] != arr[i]) { return false; } }
+        return true;
     }
     int sum() const {
         int result = 0;

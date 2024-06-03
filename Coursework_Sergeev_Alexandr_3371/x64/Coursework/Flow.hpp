@@ -83,7 +83,7 @@ public:
 	}
 
 	void updateStudent(const Student& updateStudent, const string oldGroupNumber, const string oldNumber) {
-		int index = hashFoo(oldGroupNumber);
+		int index = hashFoo(oldGroupNumber), oldid = index;
 		Student* oldStudent = nullptr;
 		try { oldStudent = arr[index].look_for_node_without_access(Student(Pair(oldGroupNumber, oldNumber)));  }
 		catch (const  runtime_error& a) { throw runtime_error("Студент не найден.\n"); }
@@ -92,7 +92,7 @@ public:
 		arr[index].remove(oldStudent);
 		if (updateStudent.data.value.groupNumber != oldGroupNumber) { index = hashFoo(updateStudent.data.value.groupNumber); }
 		if (arr[index].look_for(updateStudent)) {
-			arr[index].add(temp);
+			arr[oldid].add(temp);
 			throw exception("Ошибка: студент с таким номером телефона уже существует в новой группе.\nПожалуйста, проверьте правильность ввода и попробуйте еще раз.\n");
 		}
 		else { arr[index].add(updateStudent); }
@@ -164,6 +164,4 @@ public:
 		for (int i = 0; i < size; i++) { cnt += arr[i].common_count == 0 ? 0 : 1; }
 		return cnt;
 	}
-
-	Info& getValueForKey(const string key) { return arr[hashFoo(key)].look_for_node(Pair(key, Info())).data.value; }
 };
