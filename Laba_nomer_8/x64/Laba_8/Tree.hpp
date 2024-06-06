@@ -94,6 +94,7 @@ public:
 
 	int sizeTree(Node* n) { return n ? sizeTree(n->l) + sizeTree(n->r) + 1 : 0; }
 
+
 	void rotate(Node* n, bool left) {
 		if (!n) return;
 		Node* x = left ? n->r : n->l;
@@ -119,67 +120,31 @@ public:
 
 	Node* findAndRotate(Node*& n, int v, bool left) {
 		if (!n) return nullptr;
-		if (n->value == v) {
-			if (left) { leftRotate(n); }
-			else { rightRotate(n); }
-			return n; 
-		}
-		if (v < n->value) { n->l = findAndRotate(n->l, v, left); }
-		else { n->r = findAndRotate(n->r, v, left); }
-		return n;
+		if (n && n->value == v) return rotate(n, left), n;
+		if (v < n->value) return findAndRotate(n->l, v, left);
+		else return findAndRotate(n->r, v, left);
 	}
 
 	int height(Node* n) { return n ? max(n->l ? n->l->h : 0, n->r ? n->r->h : 0) + 1 : 0; }
 	int getBalanceFactor(Node* n) { return (n->l ? n->l->h : 0) - (n->r ? n->r->h : 0); }
 
-	void leftRotate(Node*& n) {
-		Node* r = n->r;
-		if (!r) return;
-		n->r = r->l;
-		if (r->l) r->l->p = n;
-		r->p = n->p;
-		r->l = n;
-		n->p = r;
-		n->h = height(n);
-		r->h = height(r);
-		if (!r->p) root = r;
-		else if (r->p->l == n) r->p->l = r;
-		else r->p->r = r;
-		n = r;
-	}
-
-	void rightRotate(Node*& n) {
-		Node* l = n->l;
-		if (!l) return;
-		n->l = l->r;
-		if (l->r) l->r->p = n;
-		l->p = n->p;
-		l->r = n;
-		n->p = l;
-		n->h = height(n);
-		l->h = height(l);
-		if (!l->p) root = l;
-		else if (l->p->l == n) l->p->l = l;
-		else l->p->r = l;
-		n = l;
-	}
 
 	void balance(Node*& n) {
 		if (!n) return;
 		n->h = height(n);
 		int bf = getBalanceFactor(n);
 		if (bf > 1) {
-			if (getBalanceFactor(n->l) >= 0) rightRotate(n);
+			if (getBalanceFactor(n->l) >= 0) rotate(n, false);
 			else {
-				leftRotate(n->l);
-				rightRotate(n);
+				rotate(n->l, true);
+				rotate(n, false);
 			}
 		}
 		else if (bf < -1) {
-			if (getBalanceFactor(n->r) <= 0) leftRotate(n);
+			if (getBalanceFactor(n->r) <= 0) rotate(n, true);
 			else {
-				rightRotate(n->r);
-				leftRotate(n);
+				rotate(n->r, false);
+				rotate(n, true);
 			}
 		}
 		balance(n->l);
