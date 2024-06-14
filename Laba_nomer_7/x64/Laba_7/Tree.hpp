@@ -25,6 +25,13 @@ public:
 		}
 		return *cur;
 	}
+	
+	void updateHeight(Node* n) {
+		while (n) {
+			n->h = height(n);
+			n = n->p;
+		}
+	}
 
 	Node* minNode(Node* node) {
 		while (node->l) node = node->l;
@@ -72,6 +79,7 @@ public:
 		del->l = del->r = del->p = nullptr;
 		delete del;
 		size--;
+		updateHeight(p);
 	}
 
 
@@ -115,6 +123,7 @@ public:
 		}
 		n->p = x;
 		if (!x->p) root = x;
+		updateHeight(n); updateHeight(x);
 	}
 
 	Node* findAndRotate(Node*& n, int v, bool left) {
@@ -171,6 +180,7 @@ public:
 			}
 			else { root = node; }
 			size++;
+			updateHeight(parent);
 			balance(node);
 		}
 	}
