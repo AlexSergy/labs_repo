@@ -6,7 +6,7 @@ using namespace std;
 
 template <typename T>
 class List {
-private:
+public:
     struct Node {
         T data;
         Node* next = nullptr;
@@ -61,7 +61,7 @@ private:
         return prevNode;
     }
 
-public:
+//public:
     void add(T value) {
         Node* newNode = new Node(value);
 

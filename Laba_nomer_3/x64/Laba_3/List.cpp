@@ -56,7 +56,7 @@ public:
 
 	void insert(int num, int value) {
 		Node* newNode = new Node(value);
-		if (!head) { head = newNode; head->next = newNode; }
+		if (!head) { add(value); return; }
 		num %= common_count + 1;
 		Node* cur = nullptr;
 		if (num == 0) { 

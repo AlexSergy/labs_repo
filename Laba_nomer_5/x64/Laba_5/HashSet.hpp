@@ -1,7 +1,7 @@
 #pragma once
 #include"List.hpp"
 #include<memory>
-#include<sstream> // Чтобы любой тип мог преобразовываться в str.
+#include<sstream> 
 
 using namespace std;
 
@@ -11,14 +11,11 @@ private:
 	const int size = 26;
 	unique_ptr<List<string>[]> arr;
 	
-
-	// по умолчанию преобразовываем все возможные данные в str
-	// затем от них берем hash
 	int hash(const string& value) {
 		ostringstream oss;
 		oss << value;
 		string valueStr = oss.str();
-		int h = 0;
+		unsigned int h = 0;
 		for (char c : valueStr) { h = (h * 31 + c) % size; }
 		return h;
 	}
