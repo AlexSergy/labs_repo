@@ -53,16 +53,15 @@ public:
 			Node* minP = min->p;
 			if (minP == del) {
 				min->l = del->l;
-				del->l->p = min;
 				min->p = p;
 			}
 			else {
 				minP->l = min->r;
 				if (min->r) min->r->p = minP;
 				min->r = del->r; min->l = del->l; min->p = p;
+				del->r->p = min;
 			}
 			if (del->l) del->l->p = min;
-			if (del->r) del->r->p = min;
 			if (p) {
 				if (p->l == del) p->l = min;
 				else { p->r = min; }

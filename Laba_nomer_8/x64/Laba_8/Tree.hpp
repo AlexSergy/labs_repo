@@ -151,8 +151,7 @@ public:
 		balance(n->r);
 	}
 
-	// ÍÎÂÛÅ È ÈÇÌÅÍÅÍÍÛÅ ÔÓÍÊÖÈÈ ÄËß ÂÎÑÜÌÎÉ ËÀÁÛ (ïîìå÷åíû *)
-	//*
+
 	void traverseLevel(Node* n, int*& arr, int& i, int curL, int targetL) {
 		if (!n) return;
 		if (curL == targetL) { arr[i++] = n->value; }
@@ -172,7 +171,7 @@ public:
 	};
 
 	void levelOrderTraversal(Node* r, int*& arr, Order o) {
-		int i = 0, h = height(r);
+		int i = 0, h = height(r)+1;
 		int* levelCount = new int[h]();
 		for (int l = 0; l < h; l++) {
 			traverseLevel(r, arr, i, 0, l);
